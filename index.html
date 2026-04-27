@@ -416,6 +416,12 @@ hr { margin: 25px 0; border: none; border-top: 1px dashed rgba(255,255,255,0.2);
 
 <hr>
 
+<h3 style="border-left-color: #10b981;">📩 SMS Statement</h3>
+<button class="green" onclick="loadSMSLogs()">View SMS History</button>
+<div id="smsLogDisplay" style="margin-top: 15px;"></div>
+
+<hr>
+
 <div class="grid">
     <button class="gray" onclick="openStudents()" style="color: #fff;">View Students</button>
     <button class="red" onclick="logout()">Secure Logout</button>
@@ -616,9 +622,23 @@ function updateNotice() {
     }).catch(err => alert("Error: " + err.message));
 }
 
+// ==========================================
+// MONTH & PAYMENT TRACKING HELPERS
+// ==========================================
 function getMonth(){
     let d = new Date();
     return d.getFullYear()+"-"+(d.getMonth()+1);
+}
+
+function getPrevMonth(){
+    let d = new Date();
+    d.setMonth(d.getMonth() - 1);
+    return d.getFullYear()+"-"+(d.getMonth()+1);
+}
+
+function checkPaid(paidStr, month) {
+    // স্টুডেন্টের ডাটায় নির্দিষ্ট মাসটি আছে কিনা তা চেক করার লজিক
+    return paidStr ? paidStr.split(",").includes(month) : false;
 }
 
 function handleLoginClick() {
@@ -927,17 +947,34 @@ function loadMonthlyAttendanceStudent(cls) {
     });
 }
 
+// ==========================================
+// DASHBOARD CALCULATION
+// ==========================================
 function loadDashboard(){
-db.collection("students").onSnapshot(snap=>{
-let total=0,paid=0,unpaid=0,income=0; let html="";
-snap.forEach(doc=>{
-let s=doc.data(); total++;
-if(s.paidMonth==getMonth()){ paid++; income+=Number(s.fee||0); }
-else{ unpaid++; html+=`<div class="student" style="padding:15px;"><b style="color:#ef4444;">${s.name}</b><br><span style="color:#94a3b8; font-size:14px;">🏫 Class: ${s.class} | Roll: ${s.roll ? s.roll : 'N/A'}</span><br><span style="color:#cbd5e1; font-weight:600;">📞 ${s.phone}</span></div>`; }
-});
-document.getElementById("totalStd").innerText=total; document.getElementById("paidStd").innerText=paid; document.getElementById("unpaidStd").innerText=unpaid; document.getElementById("income").innerText=income+" ৳";
-document.getElementById("unpaidList").innerHTML=html;
-});
+    db.collection("students").onSnapshot(snap=>{
+        let total=0, paid=0, unpaid=0, income=0; 
+        let html="";
+        
+        snap.forEach(doc=>{
+            let s=doc.data(); 
+            total++;
+            
+            // চেক করা হচ্ছে এই মাসের বেতন দেওয়া হয়েছে কিনা
+            if(checkPaid(s.paidMonth, getMonth())){ 
+                paid++; 
+                income+=Number(s.fee||0); 
+            } else { 
+                unpaid++; 
+                html+=`<div class="student" style="padding:15px;"><b style="color:#ef4444;">${s.name}</b><br><span style="color:#94a3b8; font-size:14px;">🏫 Class: ${s.class} | Roll: ${s.roll ? s.roll : 'N/A'}</span><br><span style="color:#cbd5e1; font-weight:600;">📞 ${s.phone}</span></div>`; 
+            }
+        });
+        
+        document.getElementById("totalStd").innerText=total; 
+        document.getElementById("paidStd").innerText=paid; 
+        document.getElementById("unpaidStd").innerText=unpaid; 
+        document.getElementById("income").innerText=income+" ৳";
+        document.getElementById("unpaidList").innerHTML=html;
+    });
 }
 
 function loadClass(cls){ 
@@ -948,32 +985,73 @@ function loadClass(cls){
 
 function searchNow(){ loadClass(currentClass); }
 
+// ==========================================
+// STUDENT DIRECTORY DISPLAY
+// ==========================================
 function showStudents(snap){
-let key=document.getElementById("searchBox").value.toLowerCase(); let html="";
-snap.forEach(doc=>{
-let s=doc.data();
-if(key && !s.name.toLowerCase().includes(key)) return;
-let isPaid = (s.paidMonth==getMonth());
-let badge=isPaid?'<span class="badge-paid">✔️ Paid</span>':'<span class="badge-unpaid">❌ Unpaid</span>';
-html+=`
-<div class="student">
-<b>${s.name}</b><br>
-<span style="color:#94a3b8; font-size:14px;">📞 ${isAdmin?s.phone:"Hidden"}</span><br>
-<span style="color:#94a3b8; font-size:14px;">🏫 Class ${s.class} &nbsp;|&nbsp; 📝 Roll: ${s.roll ? s.roll : 'N/A'}</span><br>
-<span style="color:#10b981; font-weight:600; font-size:15px;">💰 ${s.fee} ৳</span><br>
-<div style="margin-top:12px;">${badge}</div>
-${isAdmin?`<div class="row" style="margin-top:15px;"><button onclick="markPaid('${doc.id}')" style="padding:12px; font-size:14px; box-shadow:none;">Mark Paid</button><button class="red" onclick="deleteStudent('${doc.id}')" style="padding:12px; font-size:14px; box-shadow:none;">Delete</button></div>`:''}
-</div>`;
-});
-document.getElementById("list").innerHTML=html || "<div class='student' style='text-align:center; padding:20px;'>No Student Found</div>";
+    let key=document.getElementById("searchBox").value.toLowerCase(); 
+    let html="";
+    
+    snap.forEach(doc=>{
+        let s=doc.data();
+        if(key && !s.name.toLowerCase().includes(key)) return;
+        
+        // বর্তমান এবং গত মাসের স্ট্যাটাস চেক করা হচ্ছে
+        let isPaidCurrent = checkPaid(s.paidMonth, getMonth());
+        let isPaidPrev = checkPaid(s.paidMonth, getPrevMonth());
+        
+        let badge = isPaidCurrent ? '<span class="badge-paid">✔️ Paid (This Month)</span>' : '<span class="badge-unpaid">❌ Unpaid (This Month)</span>';
+        
+        let adminBtns = '';
+        if(isAdmin){
+            adminBtns += `<div class="row" style="margin-top:15px; display:flex; flex-wrap:wrap; gap:8px;">`;
+            
+            // যদি এই মাসের টাকা না দিয়ে থাকে
+            if(!isPaidCurrent) {
+                adminBtns += `<button onclick="markPaid('${doc.id}', '${getMonth()}')" style="padding:10px; font-size:13px; margin:0; flex:1;">✅ Pay Current</button>`;
+            }
+            // যদি গত মাসের টাকা (Due) না দিয়ে থাকে
+            if(!isPaidPrev) {
+                adminBtns += `<button class="orange" onclick="markPaid('${doc.id}', '${getPrevMonth()}')" style="padding:10px; font-size:13px; margin:0; flex:1;">⚠️ Pay Due</button>`;
+            }
+            
+            adminBtns += `<button class="red" onclick="deleteStudent('${doc.id}')" style="padding:10px; font-size:13px; margin:0; width:100%;">🗑️ Delete</button>`;
+            adminBtns += `</div>`;
+        }
+
+        html+=`
+        <div class="student">
+            <b>${s.name}</b><br>
+            <span style="color:#94a3b8; font-size:14px;">📞 ${isAdmin?s.phone:"Hidden"}</span><br>
+            <span style="color:#94a3b8; font-size:14px;">🏫 Class ${s.class} &nbsp;|&nbsp; 📝 Roll: ${s.roll ? s.roll : 'N/A'}</span><br>
+            <span style="color:#10b981; font-weight:600; font-size:15px;">💰 ${s.fee} ৳</span><br>
+            <div style="margin-top:12px;">${badge}</div>
+            ${adminBtns}
+        </div>`;
+    });
+    
+    document.getElementById("list").innerHTML = html || "<div class='student' style='text-align:center; padding:20px;'>No Student Found</div>";
 }
 
-function markPaid(id){ db.collection("students").doc(id).update({ paidMonth:getMonth() }); }
+// ==========================================
+// ADVANCED PAYMENT SYSTEM
+// ==========================================
+function markPaid(id, targetMonth){ 
+    if(!confirm(`আপনি কি নিশ্চিত যে ${targetMonth} মাসের বেতন জমা নিতে চান?`)) return;
+    
+    // ডাটাবেজ থেকে আগের রেকর্ড নিয়ে তার সাথে নতুন মাসটি যুক্ত করা হচ্ছে
+    db.collection("students").doc(id).get().then(doc => {
+        let s = doc.data();
+        let existingRecord = s.paidMonth || "";
+        
+        if(!checkPaid(existingRecord, targetMonth)){
+            let newRecord = existingRecord ? existingRecord + "," + targetMonth : targetMonth;
+            db.collection("students").doc(id).update({ paidMonth: newRecord });
+        }
+    });
+}
 function deleteStudent(id){ if(confirm("Are you sure you want to delete this student?")){ db.collection("students").doc(id).delete(); } }
 
-// ==========================================
-// SMS SENDING SYSTEM (Unpaid Reminder)
-// ==========================================
 // ==========================================
 // SMS SENDING SYSTEM (Unpaid Reminder) - SMSBangladesh
 // ==========================================
@@ -994,7 +1072,8 @@ function sendUnpaidSMS() {
     db.collection("students").get().then(snap => {
         snap.forEach(doc => {
             let s = doc.data();
-            if(s.paidMonth != getMonth() && s.phone) {
+            // চেক করা হচ্ছে এই মাসের টাকা বকেয়া আছে কিনা
+            if(!checkPaid(s.paidMonth, getMonth()) && s.phone) {
                 let phoneNum = s.phone.trim();
                 
                 // নাম্বারের আগে 88 না থাকলে অটোমেটিক যোগ করা
@@ -1012,7 +1091,7 @@ function sendUnpaidSMS() {
         }
 
         let numbersString = unpaidNumbers.join(",");
-        let message = "সম্মানিত শিক্ষার্থী, আপনার চলতি মাসের বেতন বকেয়া রয়েছে। অনুগ্রহ করে দ্রুত পরিশোধ করুন। - SHOHAG ICT & MATH CARE";
+        let message = "প্রিয় শিক্ষার্থী, আপনার চলতি মাসের বেতন বকেয়া রয়েছে। অনুগ্রহ করে দ্রুত পরিশোধ করুন। - SHOHAG ICT & MATH CARE";
         
         // SMSBangladesh API Link
         let url = `https://panel.smsbangladesh.com/api?user=${encodeURIComponent(apiUser)}&password=${encodeURIComponent(apiPass)}&to=${numbersString}&text=${encodeURIComponent(message)}`;
@@ -1023,6 +1102,14 @@ function sendUnpaidSMS() {
         iframe.src = url;
         document.body.appendChild(iframe);
 
+        // Firebase এ SMS এর হিস্ট্রি সেভ করা
+        db.collection("sms_logs").add({
+            date: new Date().toLocaleString(),
+            message: message,
+            totalSent: unpaidNumbers.length,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
         alert(`সফলভাবে ${unpaidNumbers.length} টি নাম্বারে মেসেজ রিকোয়েস্ট সার্ভারে পাঠানো হয়েছে!`);
 
         // ৫ সেকেন্ড পর ব্যাকগ্রাউন্ড ফ্রেমটি ডিলিট করে দেওয়া
@@ -1032,6 +1119,35 @@ function sendUnpaidSMS() {
     });
 }
 
+// ==========================================
+// SMS STATEMENT / LOG SYSTEM
+// ==========================================
+function loadSMSLogs() {
+    const display = document.getElementById("smsLogDisplay");
+    display.innerHTML = "<div style='color:#fff; text-align:center;'>Loading Logs...</div>";
+
+    // ডাটাবেজ থেকে সর্বশেষ পাঠানো মেসেজগুলোর হিস্ট্রি আনা
+    db.collection("sms_logs").orderBy("timestamp", "desc").limit(10).get().then(snap => {
+        if(snap.empty) {
+            display.innerHTML = "<div class='student' style='text-align:center;'>কোনো SMS হিস্ট্রি পাওয়া যায়নি!</div>";
+            return;
+        }
+
+        let html = "";
+        snap.forEach(doc => {
+            let data = doc.data();
+            html += `
+            <div class="student" style="padding: 15px; border-left: 4px solid #10b981;">
+                <div style="color: #94a3b8; font-size: 13px; margin-bottom: 5px;"><i class="fa-regular fa-clock"></i> ${data.date}</div>
+                <div style="font-size: 14px; color: #e2e8f0; line-height: 1.5; margin-bottom: 10px;">"${data.message}"</div>
+                <div style="color: #10b981; font-weight: 600; font-size: 14px;"><i class="fa-solid fa-paper-plane"></i> Total Sent: ${data.totalSent} Students</div>
+            </div>`;
+        });
+        display.innerHTML = html;
+    }).catch(err => {
+        display.innerHTML = "<div class='student badge-unpaid'>Error: " + err.message + "</div>";
+    });
+}
 
 </script>
 
