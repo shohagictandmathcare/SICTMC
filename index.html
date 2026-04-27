@@ -546,6 +546,18 @@ hr { margin: 25px 0; border: none; border-top: 1px dashed rgba(255,255,255,0.2);
 
 </div>
 
+<div id="paymentModal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(5px);">
+    <div class="card" style="width:90%; max-width:400px; margin:0; border:1px solid rgba(245,158,11,0.3);">
+        <h3 style="border-left-color: #f59e0b; margin-bottom: 5px;" id="payStudentName">💳 Manage Payments</h3>
+        <p style="color:#94a3b8; font-size:13px; margin-bottom:15px;">গত ৬ মাসের পেমেন্ট হিস্ট্রি</p>
+        
+        <div id="monthListContainer" style="max-height:55vh; overflow-y:auto; padding-right:5px;">
+            </div>
+        
+        <button class="red" onclick="closePayModal()" style="margin-top:15px; box-shadow:none;">❌ Close Panel</button>
+    </div>
+</div>
+
 <a href="tel:+8801410207779" class="float call">
 <i class="fa-solid fa-phone"></i>
 </a>
@@ -986,7 +998,7 @@ function loadClass(cls){
 function searchNow(){ loadClass(currentClass); }
 
 // ==========================================
-// STUDENT DIRECTORY DISPLAY
+// STUDENT DIRECTORY DISPLAY (UPDATED)
 // ==========================================
 function showStudents(snap){
     let key=document.getElementById("searchBox").value.toLowerCase(); 
@@ -996,26 +1008,14 @@ function showStudents(snap){
         let s=doc.data();
         if(key && !s.name.toLowerCase().includes(key)) return;
         
-        // বর্তমান এবং গত মাসের স্ট্যাটাস চেক করা হচ্ছে
         let isPaidCurrent = checkPaid(s.paidMonth, getMonth());
-        let isPaidPrev = checkPaid(s.paidMonth, getPrevMonth());
-        
         let badge = isPaidCurrent ? '<span class="badge-paid">✔️ Paid (This Month)</span>' : '<span class="badge-unpaid">❌ Unpaid (This Month)</span>';
         
         let adminBtns = '';
         if(isAdmin){
             adminBtns += `<div class="row" style="margin-top:15px; display:flex; flex-wrap:wrap; gap:8px;">`;
-            
-            // যদি এই মাসের টাকা না দিয়ে থাকে
-            if(!isPaidCurrent) {
-                adminBtns += `<button onclick="markPaid('${doc.id}', '${getMonth()}')" style="padding:10px; font-size:13px; margin:0; flex:1;">✅ Pay Current</button>`;
-            }
-            // যদি গত মাসের টাকা (Due) না দিয়ে থাকে
-            if(!isPaidPrev) {
-                adminBtns += `<button class="orange" onclick="markPaid('${doc.id}', '${getPrevMonth()}')" style="padding:10px; font-size:13px; margin:0; flex:1;">⚠️ Pay Due</button>`;
-            }
-            
-            adminBtns += `<button class="red" onclick="deleteStudent('${doc.id}')" style="padding:10px; font-size:13px; margin:0; width:100%;">🗑️ Delete</button>`;
+            adminBtns += `<button class="orange" onclick="openPayModal('${doc.id}', '${s.name.replace(/'/g, "\\'")}')" style="padding:10px; font-size:13px; margin:0; flex:1;">💳 Manage Payments</button>`;
+            adminBtns += `<button class="red" onclick="deleteStudent('${doc.id}')" style="padding:10px; font-size:13px; margin:0; flex:1;">🗑️ Delete</button>`;
             adminBtns += `</div>`;
         }
 
@@ -1033,24 +1033,71 @@ function showStudents(snap){
     document.getElementById("list").innerHTML = html || "<div class='student' style='text-align:center; padding:20px;'>No Student Found</div>";
 }
 
+function deleteStudent(id){ if(confirm("Are you sure you want to delete this student?")){ db.collection("students").doc(id).delete(); } }
+
 // ==========================================
-// ADVANCED PAYMENT SYSTEM
+// ADVANCED PAYMENT SYSTEM & MODAL LOGIC
 // ==========================================
-function markPaid(id, targetMonth){ 
-    if(!confirm(`আপনি কি নিশ্চিত যে ${targetMonth} মাসের বেতন জমা নিতে চান?`)) return;
+let currentPaySub = null; // রিয়েল-টাইম ডাটা আপডেটের জন্য
+
+function openPayModal(id, name) {
+    document.getElementById('paymentModal').classList.remove('hidden');
+    document.getElementById('payStudentName').innerText = "💳 " + name;
     
-    // ডাটাবেজ থেকে আগের রেকর্ড নিয়ে তার সাথে নতুন মাসটি যুক্ত করা হচ্ছে
+    if(currentPaySub) currentPaySub(); // আগের কোনো কানেকশন থাকলে বন্ধ করা
+
+    currentPaySub = db.collection("students").doc(id).onSnapshot(doc => {
+        if(!doc.exists) return;
+        let s = doc.data();
+        let paidStr = s.paidMonth || "";
+        let html = "";
+        
+        // বর্তমান মাস থেকে পিছনের ৬ মাসের লিস্ট তৈরি করা
+        for(let i=0; i<6; i++) {
+            let d = new Date();
+            d.setMonth(d.getMonth() - i);
+            let mStr = d.getFullYear() + "-" + (d.getMonth() + 1);
+            
+            let monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            let niceName = monthNames[d.getMonth()] + " " + d.getFullYear(); // যেমন: Apr 2026
+            
+            let isPaid = checkPaid(paidStr, mStr);
+            
+            if(isPaid) {
+                html += `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(16, 185, 129, 0.1); border:1px solid #10b981; padding:12px; border-radius:10px; margin-bottom:10px;">
+                    <b style="color:#10b981;">${niceName}</b>
+                    <span class="badge-paid" style="font-size:11px;">✔️ Paid</span>
+                </div>`;
+            } else {
+                html += `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(239, 68, 68, 0.1); border:1px solid #ef4444; padding:12px; border-radius:10px; margin-bottom:10px;">
+                    <b style="color:#ef4444;">${niceName}</b>
+                    <button class="green" onclick="paySpecificMonth('${id}', '${mStr}', '${niceName}')" style="margin:0; padding:6px 12px; width:auto; font-size:12px; box-shadow:none;">✅ Pay Now</button>
+                </div>`;
+            }
+        }
+        document.getElementById('monthListContainer').innerHTML = html;
+    });
+}
+
+function closePayModal() {
+    document.getElementById('paymentModal').classList.add('hidden');
+    if(currentPaySub) currentPaySub(); 
+}
+
+function paySpecificMonth(id, mStr, niceName) {
+    if(!confirm(`আপনি কি নিশ্চিত যে ${niceName} মাসের বেতন জমা নিতে চান?`)) return;
+    
     db.collection("students").doc(id).get().then(doc => {
         let s = doc.data();
-        let existingRecord = s.paidMonth || "";
-        
-        if(!checkPaid(existingRecord, targetMonth)){
-            let newRecord = existingRecord ? existingRecord + "," + targetMonth : targetMonth;
+        let existing = s.paidMonth || "";
+        if(!checkPaid(existing, mStr)) {
+            let newRecord = existing ? existing + "," + mStr : mStr;
             db.collection("students").doc(id).update({ paidMonth: newRecord });
         }
     });
 }
-function deleteStudent(id){ if(confirm("Are you sure you want to delete this student?")){ db.collection("students").doc(id).delete(); } }
 
 // ==========================================
 // SMS SENDING SYSTEM (Unpaid Reminder) - SMSBangladesh
