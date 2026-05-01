@@ -533,10 +533,10 @@ hr { margin: 25px 0; border: none; border-top: 1px dashed rgba(255,255,255,0.2);
     <span class="title">বিসমিল্লাহির রহমানির রহিম</span>
     <b>SHOHAG'S ICT & MATH CARE</b> হলো HSC (ICT) এবং SSC (MATH) এর শিক্ষার্থীদের জন্য একটি বিশ্বস্ত ও নির্ভরযোগ্য প্রতিষ্ঠান। আমরা শুধু কথায় নয়, বরং বাস্তব শিক্ষায় ও ছাত্র-ছাত্রীদের সাফল্যে বিশ্বাসী। 
     <br><br>
-    <b>পরিচালক:</b> মোঃ সোহাগ হোসেন<br>
-    <b>যোগাযোগ:</b> <span class="highlight">01571207779</span><br>
+    <b>পরিচালক:</b> মোঃ সোহাগ হোসাইন<br>
+    <b>যোগাযোগ:</b> <span class="highlight">01410-207779</span><br>
     <b>ইমেইল:</b> shohag.tkj@gmail.com<br>
-    <b>ঠিকানা:-</b> উপজেলা রোড, কেশবপুর, যশোর।
+    <b>ঠিকানা:</b> উপজেলা রোড, কেশবপুর, যশোর।
 </div>
 </div>
 
@@ -546,23 +546,11 @@ hr { margin: 25px 0; border: none; border-top: 1px dashed rgba(255,255,255,0.2);
 
 </div>
 
-<div id="paymentModal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(5px);">
-    <div class="card" style="width:90%; max-width:400px; margin:0; border:1px solid rgba(245,158,11,0.3);">
-        <h3 style="border-left-color: #f59e0b; margin-bottom: 5px;" id="payStudentName">💳 Manage Payments</h3>
-        <p style="color:#94a3b8; font-size:13px; margin-bottom:15px;">গত ৬ মাসের পেমেন্ট হিস্ট্রি</p>
-        
-        <div id="monthListContainer" style="max-height:55vh; overflow-y:auto; padding-right:5px;">
-            </div>
-        
-        <button class="red" onclick="closePayModal()" style="margin-top:15px; box-shadow:none;">❌ Close Panel</button>
-    </div>
-</div>
-
-<a href="tel:+8801571207779" class="float call">
+<a href="tel:+8801410207779" class="float call">
 <i class="fa-solid fa-phone"></i>
 </a>
 
-<a href="https://wa.me/8801571207779" class="float whatsapp">
+<a href="https://wa.me/8801410207779" class="float whatsapp">
 <i class="fa-brands fa-whatsapp"></i>
 </a>
 
@@ -755,6 +743,30 @@ async function submitBatchResult() {
         document.getElementById("resClass").value = "";
         document.getElementById("resultRows").innerHTML = `<div class="row"><input class="batchRoll" placeholder="Roll Number" type="number"><input class="batchMarks" placeholder="Marks" type="number"></div>`;
     } catch(err) { alert("Error: " + err.message); }
+}
+
+function searchResult() {
+    const cls = document.getElementById("searchResClass").value.trim(); const roll = document.getElementById("searchRoll").value.trim();
+    if(!cls || !roll) { alert("দয়া করে ক্লাস এবং রোল নাম্বার দুটিই দিন"); return; }
+
+    const display = document.getElementById("resultDisplay"); display.innerHTML = "<div class='student' style='text-align:center;'>Searching...</div>";
+    let docId = cls + "_" + roll;
+
+    db.collection("results").doc(docId).get().then(resDoc => {
+        if(resDoc.exists) {
+            let data = resDoc.data();
+            db.collection("students").where("class", "==", cls).get().then(snap => {
+                let studentName = "Unknown Student";
+                snap.forEach(sDoc => { if(sDoc.data().roll === roll) { studentName = sDoc.data().name; } });
+                display.innerHTML = `
+                    <div class="student" style="font-size: 16px; line-height: 1.8;">
+                        <b style="font-size:20px; color:#ffffff;">${studentName}</b><br>
+                        <div style="color:#cbd5e1; margin-top:5px;">🏫 Class: ${data.class} &nbsp;|&nbsp; 📝 Roll: ${data.roll}</div>
+                        <div style="margin-top:10px; font-size:18px;">🏆 Marks: <span style="color:#38bdf8; font-weight:700; font-size:26px;">${data.marks}</span></div>
+                    </div>`;
+            });
+        } else { display.innerHTML = "<div class='student badge-unpaid' style='text-align:center; display:block; padding:15px; font-size:15px;'>দুঃখিত, কোনো রেজাল্ট পাওয়া যায়নি!</div>"; }
+    }).catch(err => { display.innerHTML = "<div class='student badge-unpaid'>Error: " + err.message + "</div>"; });
 }
 
 function addSheet() {
@@ -974,7 +986,7 @@ function loadClass(cls){
 function searchNow(){ loadClass(currentClass); }
 
 // ==========================================
-// STUDENT DIRECTORY DISPLAY (UPDATED)
+// STUDENT DIRECTORY DISPLAY
 // ==========================================
 function showStudents(snap){
     let key=document.getElementById("searchBox").value.toLowerCase(); 
@@ -984,14 +996,26 @@ function showStudents(snap){
         let s=doc.data();
         if(key && !s.name.toLowerCase().includes(key)) return;
         
+        // বর্তমান এবং গত মাসের স্ট্যাটাস চেক করা হচ্ছে
         let isPaidCurrent = checkPaid(s.paidMonth, getMonth());
+        let isPaidPrev = checkPaid(s.paidMonth, getPrevMonth());
+        
         let badge = isPaidCurrent ? '<span class="badge-paid">✔️ Paid (This Month)</span>' : '<span class="badge-unpaid">❌ Unpaid (This Month)</span>';
         
         let adminBtns = '';
         if(isAdmin){
             adminBtns += `<div class="row" style="margin-top:15px; display:flex; flex-wrap:wrap; gap:8px;">`;
-            adminBtns += `<button class="orange" onclick="openPayModal('${doc.id}', '${s.name.replace(/'/g, "\\'")}')" style="padding:10px; font-size:13px; margin:0; flex:1;">💳 Manage Payments</button>`;
-            adminBtns += `<button class="red" onclick="deleteStudent('${doc.id}')" style="padding:10px; font-size:13px; margin:0; flex:1;">🗑️ Delete</button>`;
+            
+            // যদি এই মাসের টাকা না দিয়ে থাকে
+            if(!isPaidCurrent) {
+                adminBtns += `<button onclick="markPaid('${doc.id}', '${getMonth()}')" style="padding:10px; font-size:13px; margin:0; flex:1;">✅ Pay Current</button>`;
+            }
+            // যদি গত মাসের টাকা (Due) না দিয়ে থাকে
+            if(!isPaidPrev) {
+                adminBtns += `<button class="orange" onclick="markPaid('${doc.id}', '${getPrevMonth()}')" style="padding:10px; font-size:13px; margin:0; flex:1;">⚠️ Pay Due</button>`;
+            }
+            
+            adminBtns += `<button class="red" onclick="deleteStudent('${doc.id}')" style="padding:10px; font-size:13px; margin:0; width:100%;">🗑️ Delete</button>`;
             adminBtns += `</div>`;
         }
 
@@ -1009,138 +1033,89 @@ function showStudents(snap){
     document.getElementById("list").innerHTML = html || "<div class='student' style='text-align:center; padding:20px;'>No Student Found</div>";
 }
 
-function deleteStudent(id){ if(confirm("Are you sure you want to delete this student?")){ db.collection("students").doc(id).delete(); } }
-
 // ==========================================
-// ADVANCED PAYMENT SYSTEM & MODAL LOGIC
+// ADVANCED PAYMENT SYSTEM
 // ==========================================
-let currentPaySub = null; // রিয়েল-টাইম ডাটা আপডেটের জন্য
-
-function openPayModal(id, name) {
-    document.getElementById('paymentModal').classList.remove('hidden');
-    document.getElementById('payStudentName').innerText = "💳 " + name;
+function markPaid(id, targetMonth){ 
+    if(!confirm(`আপনি কি নিশ্চিত যে ${targetMonth} মাসের বেতন জমা নিতে চান?`)) return;
     
-    if(currentPaySub) currentPaySub(); // আগের কোনো কানেকশন থাকলে বন্ধ করা
-
-    currentPaySub = db.collection("students").doc(id).onSnapshot(doc => {
-        if(!doc.exists) return;
-        let s = doc.data();
-        let paidStr = s.paidMonth || "";
-        let html = "";
-        
-        // বর্তমান মাস থেকে পিছনের ৬ মাসের লিস্ট তৈরি করা
-        for(let i=0; i<6; i++) {
-            let d = new Date();
-            d.setMonth(d.getMonth() - i);
-            let mStr = d.getFullYear() + "-" + (d.getMonth() + 1);
-            
-            let monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            let niceName = monthNames[d.getMonth()] + " " + d.getFullYear(); // যেমন: Apr 2026
-            
-            let isPaid = checkPaid(paidStr, mStr);
-            
-            if(isPaid) {
-                html += `
-                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(16, 185, 129, 0.1); border:1px solid #10b981; padding:12px; border-radius:10px; margin-bottom:10px;">
-                    <b style="color:#10b981;">${niceName}</b>
-                    <span class="badge-paid" style="font-size:11px;">✔️ Paid</span>
-                </div>`;
-            } else {
-                html += `
-                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(239, 68, 68, 0.1); border:1px solid #ef4444; padding:12px; border-radius:10px; margin-bottom:10px;">
-                    <b style="color:#ef4444;">${niceName}</b>
-                    <button class="green" onclick="paySpecificMonth('${id}', '${mStr}', '${niceName}')" style="margin:0; padding:6px 12px; width:auto; font-size:12px; box-shadow:none;">✅ Pay Now</button>
-                </div>`;
-            }
-        }
-        document.getElementById('monthListContainer').innerHTML = html;
-    });
-}
-
-function closePayModal() {
-    document.getElementById('paymentModal').classList.add('hidden');
-    if(currentPaySub) currentPaySub(); 
-}
-
-function paySpecificMonth(id, mStr, niceName) {
-    if(!confirm(`আপনি কি নিশ্চিত যে ${niceName} মাসের বেতন জমা নিতে চান?`)) return;
-    
+    // ডাটাবেজ থেকে আগের রেকর্ড নিয়ে তার সাথে নতুন মাসটি যুক্ত করা হচ্ছে
     db.collection("students").doc(id).get().then(doc => {
         let s = doc.data();
-        let existing = s.paidMonth || "";
-        if(!checkPaid(existing, mStr)) {
-            let newRecord = existing ? existing + "," + mStr : mStr;
+        let existingRecord = s.paidMonth || "";
+        
+        if(!checkPaid(existingRecord, targetMonth)){
+            let newRecord = existingRecord ? existingRecord + "," + targetMonth : targetMonth;
             db.collection("students").doc(id).update({ paidMonth: newRecord });
         }
     });
 }
+function deleteStudent(id){ if(confirm("Are you sure you want to delete this student?")){ db.collection("students").doc(id).delete(); } }
 
 // ==========================================
-// SMS SENDING SYSTEM (Unpaid Reminder) - SMSBangladesh
+// SMS SENDING SYSTEM (Unpaid Reminder) - Updated for Bulk
 // ==========================================
-function sendUnpaidSMS() {
-    // আপনার SMSBangladesh এর ইমেইল এবং নতুন তৈরি করা API পাসওয়ার্ড নিচে দিন
+async function sendUnpaidSMS() {
     const apiUser = "siyamexclusive@gmail.com"; 
-    const apiPass = "Tanvir123@"; // <--- এখানে নতুন API পাসওয়ার্ডটি দিন
-
-    if(apiPass === "YOUR_NEW_API_PASSWORD_HERE" || apiPass === "") {
-        alert("দয়া করে কোডের ভেতরে আপনার নতুন API পাসওয়ার্ডটি বসান!");
-        return;
-    }
+    const apiPass = "Tanvir123@"; 
 
     if(!confirm("আপনি কি নিশ্চিত যে সব আনপেইড স্টুডেন্টদের মেসেজ পাঠাতে চান?")) return;
 
     let unpaidNumbers = [];
+    let snapshot = await db.collection("students").get();
     
-    db.collection("students").get().then(snap => {
-        snap.forEach(doc => {
-            let s = doc.data();
-            // চেক করা হচ্ছে এই মাসের টাকা বকেয়া আছে কিনা
-            if(!checkPaid(s.paidMonth, getMonth()) && s.phone) {
-                let phoneNum = s.phone.trim();
-                
-                // নাম্বারের আগে 88 না থাকলে অটোমেটিক যোগ করা
-                if(phoneNum.startsWith("01") && phoneNum.length === 11) {
-                    phoneNum = "88" + phoneNum; 
-                }
-                
-                unpaidNumbers.push(phoneNum);
+    snapshot.forEach(doc => {
+        let s = doc.data();
+        if(!checkPaid(s.paidMonth, getMonth()) && s.phone) {
+            let phoneNum = s.phone.trim();
+            if(phoneNum.startsWith("01") && phoneNum.length === 11) {
+                phoneNum = "88" + phoneNum; 
             }
-        });
-
-        if(unpaidNumbers.length === 0) {
-            alert("এই মুহূর্তে কোনো আনপেইড স্টুডেন্ট নেই!");
-            return;
+            unpaidNumbers.push(phoneNum);
         }
+    });
 
-        let numbersString = unpaidNumbers.join(",");
-        let message = "প্রিয় শিক্ষার্থী, আপনার চলতি মাসের বেতন বকেয়া রয়েছে। অনুগ্রহ করে দ্রুত পরিশোধ করুন। - SHOHAG ICT & MATH CARE";
+    if(unpaidNumbers.length === 0) {
+        alert("এই মুহূর্তে কোনো আনপেইড স্টুডেন্ট নেই!");
+        return;
+    }
+
+    let message = "প্রিয় শিক্ষার্থী, আপনার চলতি মাসের বেতন বকেয়া রয়েছে। অনুগ্রহ করে দ্রুত পরিশোধ করুন। - SHOHAG ICT & MATH CARE";
+    
+    // একবারে অনেকগুলো না পাঠিয়ে ১০টি করে ভাগে ভাগে পাঠানো (Batching)
+    const batchSize = 10;
+    let sentCount = 0;
+
+    alert(`${unpaidNumbers.length} জন স্টুডেন্টকে মেসেজ পাঠানোর প্রক্রিয়া শুরু হচ্ছে। দয়া করে শেষ না হওয়া পর্যন্ত অপেক্ষা করুন...`);
+
+    for (let i = 0; i < unpaidNumbers.length; i += batchSize) {
+        let currentBatch = unpaidNumbers.slice(i, i + batchSize);
+        let numbersString = currentBatch.join(",");
         
-        // SMSBangladesh API Link
         let url = `https://panel.smsbangladesh.com/api?user=${encodeURIComponent(apiUser)}&password=${encodeURIComponent(apiPass)}&to=${numbersString}&text=${encodeURIComponent(message)}`;
 
-        // ব্রাউজারের সিকিউরিটি (CORS) বাইপাস করে ব্যাকগ্রাউন্ডে মেসেজ পাঠানোর পদ্ধতি
-        let iframe = document.createElement("iframe");
-        iframe.style.display = "none";
-        iframe.src = url;
-        document.body.appendChild(iframe);
+        // No-Cors Mode এ fetch ব্যবহার করা যাতে ব্রাউজার ব্লক না করে
+        fetch(url, { mode: 'no-cors' });
+        
+        sentCount += currentBatch.length;
+        
+        // প্রতি ব্যাচের মাঝে ২ সেকেন্ড বিরতি (যাতে সার্ভার রিজেক্ট না করে)
+        if (i + batchSize < unpaidNumbers.length) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+    }
 
-        // Firebase এ SMS এর হিস্ট্রি সেভ করা
-        db.collection("sms_logs").add({
-            date: new Date().toLocaleString(),
-            message: message,
-            totalSent: unpaidNumbers.length,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        alert(`সফলভাবে ${unpaidNumbers.length} টি নাম্বারে মেসেজ রিকোয়েস্ট সার্ভারে পাঠানো হয়েছে!`);
-
-        // ৫ সেকেন্ড পর ব্যাকগ্রাউন্ড ফ্রেমটি ডিলিট করে দেওয়া
-        setTimeout(() => {
-            document.body.removeChild(iframe);
-        }, 5000);
+    // Firebase এ SMS এর হিস্ট্রি সেভ করা
+    db.collection("sms_logs").add({
+        date: new Date().toLocaleString(),
+        message: message,
+        totalSent: unpaidNumbers.length,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
+
+    alert(`সফলভাবে ${sentCount} টি নাম্বারে মেসেজ রিকোয়েস্ট পাঠানো সম্পন্ন হয়েছে!`);
 }
+
 
 // ==========================================
 // SMS STATEMENT / LOG SYSTEM
@@ -1171,85 +1146,6 @@ function loadSMSLogs() {
         display.innerHTML = "<div class='student badge-unpaid'>Error: " + err.message + "</div>";
     });
 }
-
-// ==========================================
-// EXAM RESULT & TOP 2 LEADERBOARD SYSTEM
-// ==========================================
-async function searchResult() {
-    const cls = document.getElementById("searchResClass").value.trim(); 
-    const roll = document.getElementById("searchRoll").value.trim();
-    
-    if(!cls || !roll) { alert("দয়া করে ক্লাস এবং রোল নাম্বার দুটিই দিন"); return; }
-
-    const display = document.getElementById("resultDisplay"); 
-    display.innerHTML = "<div class='student' style='text-align:center;'>Searching & Generating Leaderboard...</div>";
-
-    try {
-        // ১. ওই ক্লাসের সবার রেজাল্ট ডাটাবেজ থেকে আনা
-        const resSnap = await db.collection("results").where("class", "==", cls).get();
-        let allResults = [];
-        resSnap.forEach(doc => allResults.push(doc.data()));
-
-        if(allResults.length === 0) {
-            display.innerHTML = "<div class='student badge-unpaid' style='text-align:center; padding:15px;'>এই ক্লাসের কোনো রেজাল্ট এখনো পাবলিশ হয়নি!</div>";
-            return;
-        }
-
-        // ২. মার্কস অনুযায়ী সবাইকে বড় থেকে ছোট সাজানো (Descending Order)
-        allResults.sort((a, b) => Number(b.marks) - Number(a.marks));
-
-        // ৩. স্টুডেন্টদের নাম বের করার জন্য ডাটাবেজ থেকে স্টুডেন্ট লিস্ট আনা
-        const stdSnap = await db.collection("students").where("class", "==", cls).get();
-        let studentDict = {};
-        stdSnap.forEach(doc => {
-            let s = doc.data();
-            studentDict[s.roll] = s.name; // রোল অনুযায়ী নাম সেভ করা
-        });
-
-        // ৪. Top 2 (১ম, ২য়) এর জন্য লিডারবোর্ড ডিজাইন তৈরি
-        let html = `<h4 style="color:#f59e0b; text-align:center; margin-bottom:15px;"><i class="fa-solid fa-trophy"></i> Top 2 Scorers of Class ${cls}</h4><div class="grid">`;
-        
-        // এখানে শুধু ২ জনকে দেখানোর জন্য Math.min(2, ...) করে দেওয়া হয়েছে
-        for(let i=0; i<Math.min(2, allResults.length); i++) {
-            let r = allResults[i];
-            let name = studentDict[r.roll] || "Unknown Student";
-            let color = i===0 ? "#f59e0b" : "#94a3b8"; // Gold, Silver
-            let icon = i===0 ? "🥇" : "🥈";
-            
-            html += `
-            <div class="stat" style="border: 1px solid ${color}; background: rgba(0,0,0,0.3); padding:15px 10px;">
-                <span style="font-size:15px; color:${color}; font-weight:700;">${icon} Rank ${i+1}</span>
-                <div style="font-size:13px; color:#fff; margin:8px 0; font-weight:600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${name}</div>
-                <div style="font-size:22px; font-weight:700; color:${color}">${r.marks}</div>
-            </div>`;
-        }
-        
-        html += `</div><hr style="margin:20px 0; border-top:1px dashed rgba(255,255,255,0.2);">`;
-
-        // ৫. শুধুমাত্র সার্চ করা স্টুডেন্টের পার্সোনাল রেজাল্ট দেখানো
-        let myResult = allResults.find(r => r.roll === roll);
-        
-        if(myResult) {
-            let myName = studentDict[roll] || "Student";
-            html += `
-            <div class="student" style="border-left-color: #38bdf8; position:relative;">
-                <span style="position:absolute; top:10px; right:10px; background:#0284c7; color:#fff; font-size:11px; padding:3px 8px; border-radius:50px;">Your Result</span>
-                <b style="font-size:18px; color:#fff;">${myName}</b><br>
-                <div style="color:#cbd5e1; margin-top:5px; font-size:14px;">🏫 Class: ${myResult.class} &nbsp;|&nbsp; 📝 Roll: ${myResult.roll}</div>
-                <div style="margin-top:12px; font-size:16px;">🏆 Obtained Marks: <span style="color:#38bdf8; font-weight:700; font-size:24px;">${myResult.marks}</span></div>
-            </div>`;
-        } else {
-            // যদি রোল ভুল দেয় বা তার রেজাল্ট না থাকে
-            html += `<div class='student badge-unpaid' style='text-align:center; padding:15px; font-size:14px;'>দুঃখিত, আপনার রেজাল্ট পাওয়া যায়নি! রোল নম্বর চেক করুন।</div>`;
-        }
-
-        display.innerHTML = html;
-
-    } catch(err) {
-        display.innerHTML = "<div class='student badge-unpaid'>Error: " + err.message + "</div>";
-    }
-}
-
 
 </script>
 
