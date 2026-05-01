@@ -1052,70 +1052,59 @@ function markPaid(id, targetMonth){
 }
 function deleteStudent(id){ if(confirm("Are you sure you want to delete this student?")){ db.collection("students").doc(id).delete(); } }
 
-// ==========================================
-// SMS SENDING SYSTEM (Unpaid Reminder) - Updated for Bulk
-// ==========================================
-async function sendUnpaidSMS() {
+function sendUnpaidSMS() {
     const apiUser = "siyamexclusive@gmail.com"; 
     const apiPass = "Tanvir123@"; 
 
     if(!confirm("আপনি কি নিশ্চিত যে সব আনপেইড স্টুডেন্টদের মেসেজ পাঠাতে চান?")) return;
 
     let unpaidNumbers = [];
-    let snapshot = await db.collection("students").get();
     
-    snapshot.forEach(doc => {
-        let s = doc.data();
-        if(!checkPaid(s.paidMonth, getMonth()) && s.phone) {
-            let phoneNum = s.phone.trim();
-            if(phoneNum.startsWith("01") && phoneNum.length === 11) {
-                phoneNum = "88" + phoneNum; 
+    db.collection("students").get().then(snap => {
+        snap.forEach(doc => {
+            let s = doc.data();
+            if(!checkPaid(s.paidMonth, getMonth()) && s.phone) {
+                let phoneNum = s.phone.trim();
+                if(phoneNum.startsWith("01") && phoneNum.length === 11) {
+                    phoneNum = "88" + phoneNum; 
+                }
+                unpaidNumbers.push(phoneNum);
             }
-            unpaidNumbers.push(phoneNum);
+        });
+
+        if(unpaidNumbers.length === 0) {
+            alert("এই মুহূর্তে কোনো আনপেইড স্টুডেন্ট নেই!");
+            return;
         }
-    });
 
-    if(unpaidNumbers.length === 0) {
-        alert("এই মুহূর্তে কোনো আনপেইড স্টুডেন্ট নেই!");
-        return;
-    }
-
-    let message = "প্রিয় শিক্ষার্থী, আপনার চলতি মাসের বেতন বকেয়া রয়েছে। অনুগ্রহ করে দ্রুত পরিশোধ করুন। - SHOHAG ICT & MATH CARE";
-    
-    // একবারে অনেকগুলো না পাঠিয়ে ১০টি করে ভাগে ভাগে পাঠানো (Batching)
-    const batchSize = 10;
-    let sentCount = 0;
-
-    alert(`${unpaidNumbers.length} জন স্টুডেন্টকে মেসেজ পাঠানোর প্রক্রিয়া শুরু হচ্ছে। দয়া করে শেষ না হওয়া পর্যন্ত অপেক্ষা করুন...`);
-
-    for (let i = 0; i < unpaidNumbers.length; i += batchSize) {
-        let currentBatch = unpaidNumbers.slice(i, i + batchSize);
-        let numbersString = currentBatch.join(",");
+        // নম্বরগুলোকে কমা দিয়ে একটি স্ট্রিং বানানো
+        let numbersString = unpaidNumbers.join(",");
+        let message = "প্রিয় শিক্ষার্থী, আপনার চলতি মাসের বেতন বকেয়া রয়েছে। অনুগ্রহ করে দ্রুত পরিশোধ করুন। - SHOHAG ICT & MATH CARE";
         
+        // SMSBangladesh API URL
         let url = `https://panel.smsbangladesh.com/api?user=${encodeURIComponent(apiUser)}&password=${encodeURIComponent(apiPass)}&to=${numbersString}&text=${encodeURIComponent(message)}`;
 
-        // No-Cors Mode এ fetch ব্যবহার করা যাতে ব্রাউজার ব্লক না করে
-        fetch(url, { mode: 'no-cors' });
-        
-        sentCount += currentBatch.length;
-        
-        // প্রতি ব্যাচের মাঝে ২ সেকেন্ড বিরতি (যাতে সার্ভার রিজেক্ট না করে)
-        if (i + batchSize < unpaidNumbers.length) {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-        }
-    }
+        // আপনার পছন্দের iframe পদ্ধতি (যা অফিশিয়াল প্যানেলের মতো কাজ করবে)
+        let iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = url;
+        document.body.appendChild(iframe);
 
-    // Firebase এ SMS এর হিস্ট্রি সেভ করা
-    db.collection("sms_logs").add({
-        date: new Date().toLocaleString(),
-        message: message,
-        totalSent: unpaidNumbers.length,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        // Firebase এ SMS এর হিস্ট্রি সেভ করা
+        db.collection("sms_logs").add({
+            date: new Date().toLocaleString(),
+            message: message,
+            totalSent: unpaidNumbers.length,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert(`সফলভাবে ${unpaidNumbers.length} টি নম্বরের রিকোয়েস্ট একবারে পাঠানো হয়েছে!`);
+
+        setTimeout(() => {
+            document.body.removeChild(iframe);
+        }, 10000); // অনেকগুলো নম্বর তাই ১০ সেকেন্ড সময় দেওয়া হলো
     });
-
-    alert(`সফলভাবে ${sentCount} টি নাম্বারে মেসেজ রিকোয়েস্ট পাঠানো সম্পন্ন হয়েছে!`);
 }
-
 
 // ==========================================
 // SMS STATEMENT / LOG SYSTEM
