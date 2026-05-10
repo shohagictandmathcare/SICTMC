@@ -1575,9 +1575,15 @@ function calcBinMath() {
 function runHtml() {
     let code = document.getElementById('htmlInput').value;
     let frame = document.getElementById('htmlOutputFrame');
-    let htmlContent = `<style>body{font-family:sans-serif; color:#333; padding:10px;}</style>` + code;
-    frame.srcdoc = htmlContent;
+    
+    // সব ব্রাউজার ও WebViewer এ সাপোর্ট করার জন্য
+    let frameDoc = frame.contentDocument || frame.contentWindow.document;
+    
+    frameDoc.open();
+    frameDoc.write(`<style>body{font-family: 'Poppins', sans-serif; color: #333; padding: 10px; word-wrap: break-word;}</style>` + code);
+    frameDoc.close();
 }
+
 
 // ==========================================
 // TOOL 6: MATH SOLVER
