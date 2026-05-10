@@ -164,7 +164,7 @@ h3 {
 h4 { color: #cbd5e1; font-weight: 500; margin-bottom: 15px; font-size: 15px;}
 
 /* Stylish Floating Inputs */
-input, select {
+input, select, textarea {
     width: 100%;
     padding: 15px 16px;
     margin: 8px 0;
@@ -178,8 +178,8 @@ input, select {
     transition: all 0.3s ease;
 }
 
-input::placeholder { color: #94a3b8; font-weight: 400;}
-input:focus, select:focus {
+input::placeholder, textarea::placeholder { color: #94a3b8; font-weight: 400;}
+input:focus, select:focus, textarea:focus {
     border-color: #38bdf8;
     background: rgba(0, 0, 0, 0.4);
     box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
@@ -214,6 +214,7 @@ button:active { transform: translateY(1px); }
 .orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
 .red { background: linear-gradient(135deg, #ef4444, #b91c1c); }
 .green { background: linear-gradient(135deg, #10b981, #059669); }
+.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
 .gray { background: rgba(255, 255, 255, 0.1); color: #cbd5e1; box-shadow: none; border: 1px solid rgba(255,255,255,0.1); } 
 .gray:hover { background: rgba(255,255,255,0.2); color: #fff; }
 
@@ -321,6 +322,28 @@ hr { margin: 25px 0; border: none; border-top: 1px dashed rgba(255,255,255,0.2);
 .about-text b { color: #fff; }
 .about-text .highlight { color: #38bdf8; font-weight: 600; }
 .about-text .title { color: #38bdf8; font-size: 18px; font-weight: 700; margin-bottom: 10px; display: block;}
+
+/* =========================================
+   NEW TOOLS STYLES (LOGIC, HTML, MATH, etc.)
+========================================= */
+.calc-display { background: #ffffff; color: #0f172a; padding: 20px; font-size: 22px; font-weight: 700; border-radius: 12px; margin-bottom: 15px; min-height: 70px; word-wrap: break-word; font-family: 'Courier New', Courier, monospace; }
+.calc-keys { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 15px; }
+.calc-keys button { padding: 15px 5px; font-size: 18px; font-weight: bold; background: rgba(255, 255, 255, 0.9); color: #0f172a; margin: 0; border-radius: 8px; transition: 0.2s; }
+.calc-keys button:active { transform: scale(0.95); }
+.calc-keys button.action-btn { background: #ef4444; color: #fff; }
+.calc-keys button.action-btn.del { background: #64748b; }
+
+table.truth-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: rgba(0,0,0,0.3); color: #fff; text-align: center; border-radius: 8px; overflow: hidden; }
+table.truth-table th, table.truth-table td { border: 1px solid rgba(255,255,255,0.2); padding: 12px 8px; }
+table.truth-table th { background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-size: 16px;}
+table.truth-table tr:nth-child(even) { background: rgba(255,255,255,0.05); }
+
+.canvas-wrapper { width: 100%; overflow-x: auto; background: #0f172a; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-top: 15px; padding: 10px 0;}
+
+.output-box { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(56, 189, 248, 0.3); padding: 15px; border-radius: 12px; color: #fff; font-family: monospace; font-size: 16px; margin-top: 10px; word-wrap: break-word;}
+.output-label { color: #38bdf8; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block;}
+
+#htmlOutputFrame { width: 100%; height: 250px; background: #fff; border: none; border-radius: 12px; margin-top: 15px; }
 </style>
 </head>
 
@@ -360,6 +383,10 @@ hr { margin: 25px 0; border: none; border-top: 1px dashed rgba(255,255,255,0.2);
                 <i class="fa-solid fa-calendar-check"></i>
                 <span>Attendance</span>
             </div>
+            <div class="app-btn" onclick="openToolsMenu()">
+                <i class="fa-solid fa-toolbox"></i>
+                <span>Student Tools</span>
+            </div>
         </div>
 
         <button class="about-btn" onclick="openAboutPage()"><i class="fa-solid fa-circle-info"></i> About Us</button>
@@ -373,6 +400,146 @@ hr { margin: 25px 0; border: none; border-top: 1px dashed rgba(255,255,255,0.2);
     </div>
 
 </div>
+
+<div class="card hidden" id="studentToolsMenu">
+    <h3 style="border-left-color: #38bdf8;"><i class="fa-solid fa-toolbox"></i> Student Tools</h3>
+    <button class="orange" onclick="backHome()" style="margin-bottom: 15px;">⬅ Back to Home</button>
+    
+    <div class="app-grid">
+        <div class="app-btn" onclick="openSpecificTool('toolLogicGate')">
+            <i class="fa-solid fa-microchip" style="color:#f59e0b;"></i><span>লজিক গেইট</span>
+        </div>
+        <div class="app-btn" onclick="openSpecificTool('toolBaseConverter')">
+            <i class="fa-solid fa-calculator" style="color:#10b981;"></i><span>সংখ্যা রূপান্তরক</span>
+        </div>
+        <div class="app-btn" onclick="openSpecificTool('tool2sComplement')">
+            <i class="fa-solid fa-layer-group" style="color:#8b5cf6;"></i><span>2's Complement</span>
+        </div>
+        <div class="app-btn" onclick="openSpecificTool('toolBinaryMath')">
+            <i class="fa-solid fa-plus-minus" style="color:#ef4444;"></i><span>বাইনারি যোগ-বিয়োগ</span>
+        </div>
+        <div class="app-btn" onclick="openSpecificTool('toolHtmlPractice')">
+            <i class="fa-brands fa-html5" style="color:#3b82f6;"></i><span>HTML প্র্যাকটিস</span>
+        </div>
+        <div class="app-btn" onclick="openSpecificTool('toolMathSolver')">
+            <i class="fa-solid fa-superscript" style="color:#ec4899;"></i><span>Math Special</span>
+        </div>
+    </div>
+</div>
+
+<div class="card hidden" id="toolLogicGate">
+    <h3 style="border-left-color: #f59e0b;">🔌 লজিক গেইট ক্যালকুলেটর</h3>
+    <button class="orange" onclick="backToToolsMenu()" style="margin-bottom: 15px;">⬅ Back to Tools</button>
+    
+    <div style="font-size: 13px; color: #94a3b8; margin-bottom: 8px;">সমীকরণ লিখুন:</div>
+    <div class="calc-display" id="calcDisplay">F = </div>
+    <div class="calc-keys">
+        <button onclick="typeCalc('A')">A</button> <button onclick="typeCalc('B')">B</button> <button onclick="typeCalc('C')">C</button> <button onclick="typeCalc('X')">X</button> <button onclick="typeCalc('Y')">Y</button>
+        <button onclick="typeCalc('P')">P</button> <button onclick="typeCalc('Q')">Q</button> <button onclick="typeCalc('R')">R</button> <button onclick="typeCalc('(')">(</button> <button onclick="typeCalc(')')">)</button>
+        <button onclick="typeCalc('+')">+</button> <button onclick="typeCalc('.')">.</button> <button onclick="typeCalc('⊕')">⊕</button> <button onclick="typeCalc('⊙')">⊙</button> <button onclick="typeCalc('\'')">' (Bar)</button>
+        <button onclick="typeCalc('-')">-</button>
+        <button onclick="typeCalc('DEL')" class="action-btn del" style="grid-column: span 3;">⌫ Delete</button>
+        <button onclick="typeCalc('AC')" class="action-btn">AC</button>
+    </div>
+    <div class="row" style="margin-top: 15px;">
+        <button class="blue" onclick="generateLogicCircuit()">লজিক চিত্র</button>
+        <button class="green" onclick="generateTruthTable()">সত্যক সারণি</button>
+    </div>
+    <div id="calcOutput" style="margin-top: 20px;"></div>
+</div>
+
+<div class="card hidden" id="toolBaseConverter">
+    <h3 style="border-left-color: #10b981;">🔢 সংখ্যা পদ্ধতি রূপান্তরক</h3>
+    <button class="orange" onclick="backToToolsMenu()" style="margin-bottom: 15px;">⬅ Back to Tools</button>
+    
+    <select id="baseFrom">
+        <option value="10">Decimal (দশমিক - 10)</option>
+        <option value="2">Binary (বাইনারি - 2)</option>
+        <option value="8">Octal (অক্টাল - 8)</option>
+        <option value="16">Hexadecimal (হেক্সা - 16)</option>
+    </select>
+    <input type="text" id="baseInput" placeholder="সংখ্যাটি লিখুন (e.g., 1011 or 45)" oninput="convertBase()">
+    
+    <div style="margin-top: 20px;">
+        <div class="output-box"><span class="output-label">Binary (2)</span><div id="outBin">-</div></div>
+        <div class="output-box"><span class="output-label">Octal (8)</span><div id="outOct">-</div></div>
+        <div class="output-box"><span class="output-label">Decimal (10)</span><div id="outDec">-</div></div>
+        <div class="output-box"><span class="output-label">Hexadecimal (16)</span><div id="outHex">-</div></div>
+    </div>
+</div>
+
+<div class="card hidden" id="tool2sComplement">
+    <h3 style="border-left-color: #8b5cf6;">🧮 2's Complement নির্ণায়ক</h3>
+    <button class="orange" onclick="backToToolsMenu()" style="margin-bottom: 15px;">⬅ Back to Tools</button>
+    
+    <div class="student" style="padding: 15px; margin-top: 0;">
+        <p style="font-size: 13px; color: #cbd5e1; line-height: 1.6;">যেকোনো বেসের দুটি সংখ্যার যোগ বা বিয়োগ ২-এর পরিপূরক পদ্ধতিতে করুন।</p>
+    </div>
+    
+    <div class="row">
+        <input type="text" id="compVal1" placeholder="১ম সংখ্যা (e.g., 43)">
+        <select id="compBase1">
+            <option value="10">Decimal (10)</option>
+            <option value="2">Binary (2)</option>
+            <option value="8" selected>Octal (8)</option>
+            <option value="16">Hexa (16)</option>
+        </select>
+    </div>
+    
+    <select id="compOp" style="background: rgba(56, 189, 248, 0.1); color: #38bdf8; font-weight:bold; text-align:center;">
+        <option value="-">বিয়োগ (-)</option>
+        <option value="+">যোগ (+)</option>
+    </select>
+
+    <div class="row">
+        <input type="text" id="compVal2" placeholder="২য় সংখ্যা (e.g., 10)">
+        <select id="compBase2">
+            <option value="10" selected>Decimal (10)</option>
+            <option value="2">Binary (2)</option>
+            <option value="8">Octal (8)</option>
+            <option value="16">Hexa (16)</option>
+        </select>
+    </div>
+    
+    <select id="compBits" style="margin-bottom: 15px;">
+        <option value="8">8-Bit Register</option>
+        <option value="16">16-Bit Register</option>
+    </select>
+
+    <button class="blue" onclick="calc2sComplement()">Calculate</button>
+    
+    <div id="compOutput" style="margin-top: 15px;"></div>
+</div>
+
+<div class="card hidden" id="toolHtmlPractice">
+    <h3 style="border-left-color: #3b82f6;">🌐 HTML প্র্যাকটিস বোর্ড</h3>
+    <button class="orange" onclick="backToToolsMenu()" style="margin-bottom: 15px;">⬅ Back to Tools</button>
+    
+    <textarea id="htmlInput" rows="6" placeholder="এখানে তোমার HTML কোড লেখো...&#10;যেমন: <h1>Hello World</h1>" onkeyup="runHtml()"></textarea>
+    
+    <div style="font-size: 13px; color: #38bdf8; margin-top: 10px; font-weight: 600;"><i class="fa-solid fa-desktop"></i> Live Preview:</div>
+    <iframe id="htmlOutputFrame"></iframe>
+</div>
+
+<div class="card hidden" id="toolMathSolver">
+    <h3 style="border-left-color: #ec4899;">➗ Math Special (বীজগণিত)</h3>
+    <button class="orange" onclick="backToToolsMenu()" style="margin-bottom: 15px;">⬅ Back to Tools</button>
+    
+    <div class="student" style="padding: 15px; margin-top: 0; text-align: center;">
+        <b style="color:#ec4899; font-size:20px;">ax² + bx + c = 0</b><br>
+        <span style="font-size:13px; color:#cbd5e1;">দ্বিঘাত সমীকরণের মূল (Roots) নির্ণয়</span>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+        <input type="number" id="quadA" placeholder="a">
+        <input type="number" id="quadB" placeholder="b">
+        <input type="number" id="quadC" placeholder="c">
+    </div>
+    <button class="blue" onclick="solveQuadratic()">Solve Equation</button>
+    
+    <div id="quadOutput" style="margin-top: 20px;"></div>
+</div>
+
 
 <div class="card hidden" id="adminBox">
 
@@ -533,7 +700,7 @@ hr { margin: 25px 0; border: none; border-top: 1px dashed rgba(255,255,255,0.2);
     <b>SHOHAG'S ICT & MATH CARE</b> হলো HSC (ICT) এবং SSC (MATH) এর শিক্ষার্থীদের জন্য একটি বিশ্বস্ত ও নির্ভরযোগ্য প্রতিষ্ঠান। আমরা শুধু কথায় নয়, বরং বাস্তব শিক্ষায় ও ছাত্র-ছাত্রীদের সাফল্যে বিশ্বাসী। 
     <br><br>
     <b>পরিচালক:</b> মোঃ সোহাগ হোসাইন<br>
-    <b>যোগাযোগ:</b> <span class="highlight">01410-207779</span><br>
+    <b>যোগাযোগ:</b> <span class="highlight">+8801571207779</span><br>
     <b>ইমেইল:</b> shohag.tkj@gmail.com<br>
     <b>ঠিকানা:</b> উপজেলা রোড, কেশবপুর, যশোর।
 </div>
@@ -545,11 +712,11 @@ hr { margin: 25px 0; border: none; border-top: 1px dashed rgba(255,255,255,0.2);
 
 </div>
 
-<a href="tel:+8801410207779" class="float call">
+<a href="tel:+8801571207779" class="float call">
 <i class="fa-solid fa-phone"></i>
 </a>
 
-<a href="https://wa.me/8801410207779" class="float whatsapp">
+<a href="https://wa.me/8801571207779" class="float whatsapp">
 <i class="fa-brands fa-whatsapp"></i>
 </a>
 
@@ -558,6 +725,9 @@ hr { margin: 25px 0; border: none; border-top: 1px dashed rgba(255,255,255,0.2);
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
+// ==========================================
+// FIREBASE CONFIGURATION
+// ==========================================
 const firebaseConfig = {
 apiKey:"AIzaSyCTb_6TevB34PVFrz7Cr5RrWd2bplza_SA",
 authDomain:"shohagictandmathcare.firebaseapp.com",
@@ -576,6 +746,9 @@ let currentClass = "9";
 let currentAttClass = "9";
 let attMode = "daily";
 
+// ==========================================
+// SCHEDULES
+// ==========================================
 const schedules = {
     "9": "<b>🕒 ব্যাচের সময়:</b> বিকাল ৩:০০ টা - ৫:০০ টা",
     "10": "<b>🕒 ব্যাচের সময়:</b> বিকাল ৩:০০ টা - ৫:০০ টা",
@@ -593,12 +766,17 @@ function updateScheduleBox(cls, boxId) {
     }
 }
 
+// ==========================================
+// INITIALIZATION
+// ==========================================
 document.addEventListener("DOMContentLoaded",()=>{
     document.getElementById("currentMonth").innerText=getMonth();
+    
     let today = new Date().toISOString().split('T')[0];
     document.getElementById("studentAttDate").value = today;
     document.getElementById("attMonth").value = today.substring(0, 7); 
     
+    // Load Dynamic Notice
     db.collection("settings").doc("notice").onSnapshot(doc => {
         if(doc.exists && doc.data().text) {
             document.getElementById("scrollingNotice").innerText = doc.data().text;
@@ -606,6 +784,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     });
 });
 
+// Admin Update Notice
 function updateNotice() {
     const text = document.getElementById("noticeInput").value.trim();
     if(!text) return alert("Please enter notice text!");
@@ -616,6 +795,9 @@ function updateNotice() {
     }).catch(err => alert("Error: " + err.message));
 }
 
+// ==========================================
+// MONTH & PAYMENT TRACKING HELPERS
+// ==========================================
 function getMonth(){
     let d = new Date();
     return d.getFullYear()+"-"+(d.getMonth()+1);
@@ -631,6 +813,9 @@ function checkPaid(paidStr, month) {
     return paidStr ? paidStr.split(",").includes(month) : false;
 }
 
+// ==========================================
+// AUTHENTICATION & NAVIGATION
+// ==========================================
 function handleLoginClick() {
     if(isAdmin) { openDashboard(); } else { login(); }
 }
@@ -659,22 +844,10 @@ auth.onAuthStateChanged(user=>{
 function logout(){ auth.signOut().then(()=>location.reload()); }
 
 function hideAllCards(){
-    document.getElementById("home").classList.add("hidden");
-    document.getElementById("adminBox").classList.add("hidden");
-    document.getElementById("dashboard").classList.add("hidden");
-    document.getElementById("studentPage").classList.add("hidden");
-    document.getElementById("resultPage").classList.add("hidden");
-    document.getElementById("sheetPage").classList.add("hidden");
-    document.getElementById("attendancePage").classList.add("hidden");
-    document.getElementById("aboutPage").classList.add("hidden");
+    document.querySelectorAll('.card').forEach(el => el.classList.add('hidden'));
 }
 
-function openDashboard() {
-    hideAllCards();
-    document.getElementById("adminBox").classList.remove("hidden");
-    document.getElementById("dashboard").classList.remove("hidden");
-}
-
+function openDashboard() { hideAllCards(); document.getElementById("adminBox").classList.remove("hidden"); document.getElementById("dashboard").classList.remove("hidden"); }
 function openStudents(){ hideAllCards(); document.getElementById("studentPage").classList.remove("hidden"); loadClass("9"); }
 function openResults(){ hideAllCards(); document.getElementById("resultPage").classList.remove("hidden"); document.getElementById("resultDisplay").innerHTML = ""; }
 function openSheets(){ hideAllCards(); document.getElementById("sheetPage").classList.remove("hidden"); document.getElementById("sheetList").innerHTML = ""; }
@@ -682,13 +855,24 @@ function openAboutPage(){ hideAllCards(); document.getElementById("aboutPage").c
 function openAttendancePage(){ hideAllCards(); document.getElementById("attendancePage").classList.remove("hidden"); studentSetClass(currentAttClass); }
 function backHome(){ hideAllCards(); document.getElementById("home").classList.remove("hidden"); }
 
+// TOOLS NAVIGATION
+function openToolsMenu(){ hideAllCards(); document.getElementById("studentToolsMenu").classList.remove("hidden"); }
+function backToToolsMenu(){ hideAllCards(); document.getElementById("studentToolsMenu").classList.remove("hidden"); }
+function openSpecificTool(toolId){ hideAllCards(); document.getElementById(toolId).classList.remove("hidden"); }
+
+
+// ==========================================
+// STUDENT MANAGEMENT CORE
+// ==========================================
 function addStudent(){
     const name=document.getElementById("name").value;
     const phone=document.getElementById("phone").value;
     const cls=document.getElementById("studentClass").value;
     const roll=document.getElementById("roll").value;
     const fee=document.getElementById("fee").value;
+
     if(!name || !phone || !cls || !roll){ alert("সব তথ্য সঠিকভাবে দিন (রোল সহ)"); return; }
+
     db.collection("students").add({ name:name, phone:phone, class:cls, roll:roll, fee:fee, paidMonth:"" }).then(()=>{
         alert("Student Added Successfully");
         document.getElementById("name").value=""; document.getElementById("phone").value=""; document.getElementById("studentClass").value=""; document.getElementById("roll").value="";
@@ -705,8 +889,10 @@ async function submitBatchResult() {
     try {
         const cls = document.getElementById("resClass").value.trim();
         if(!cls) { alert("দয়া করে ক্লাস সিলেক্ট করুন!"); return; }
+
         const rolls = document.querySelectorAll(".batchRoll"); const marks = document.querySelectorAll(".batchMarks");
         let validCount = 0; let batch = db.batch();
+
         for(let i=0; i<rolls.length; i++) {
             let r = rolls[i].value.trim(); let m = marks[i].value.trim();
             if(r && m) {
@@ -714,6 +900,7 @@ async function submitBatchResult() {
                 batch.set(ref, { class: cls, roll: r, marks: m }, { merge: true });
             }
         }
+
         if(validCount === 0) { alert("কমপক্ষে একটি রোল এবং প্রাপ্ত নাম্বার দিন!"); return; }
         await batch.commit(); alert(validCount + " টি রেজাল্ট সফলভাবে ডাটাবেজে যুক্ত হয়েছে!");
         document.getElementById("resClass").value = "";
@@ -724,8 +911,10 @@ async function submitBatchResult() {
 function searchResult() {
     const cls = document.getElementById("searchResClass").value.trim(); const roll = document.getElementById("searchRoll").value.trim();
     if(!cls || !roll) { alert("দয়া করে ক্লাস এবং রোল নাম্বার দুটিই দিন"); return; }
+
     const display = document.getElementById("resultDisplay"); display.innerHTML = "<div class='student' style='text-align:center;'>Searching...</div>";
     let docId = cls + "_" + roll;
+
     db.collection("results").doc(docId).get().then(resDoc => {
         if(resDoc.exists) {
             let data = resDoc.data();
@@ -746,6 +935,7 @@ function searchResult() {
 function addSheet() {
     const cls = document.getElementById("sheetClass").value.trim(); const title = document.getElementById("sheetTitle").value.trim(); const link = document.getElementById("sheetLink").value.trim();
     if(!cls || !title || !link) { alert("ক্লাস, শিটের নাম এবং লিংক দিন!"); return; }
+
     db.collection("sheets").add({ class: cls, title: title, link: link }).then(() => {
         alert("শিট সফলভাবে আপলোড হয়েছে!");
         document.getElementById("sheetClass").value = ""; document.getElementById("sheetTitle").value = ""; document.getElementById("sheetLink").value = "";
@@ -772,6 +962,9 @@ function loadSheets(cls) {
 
 function deleteSheet(id) { if(confirm("আপনি কি নিশ্চিত যে এই শিটটি ডিলিট করতে চান?")) { db.collection("sheets").doc(id).delete(); } }
 
+// ==========================================
+// INTEGRATED ATTENDANCE SYSTEM
+// ==========================================
 function setAttMode(mode) {
     attMode = mode;
     document.getElementById("studentAttendanceList").innerHTML = "";
@@ -796,33 +989,45 @@ function studentSetClass(cls) {
 }
 
 function studentLoadAttendance() {
-    if(attMode === 'daily') { loadDailyAttendanceStudent(currentAttClass); } else { loadMonthlyAttendanceStudent(currentAttClass); }
+    if(attMode === 'daily') {
+        loadDailyAttendanceStudent(currentAttClass);
+    } else {
+        loadMonthlyAttendanceStudent(currentAttClass);
+    }
 }
 
 function loadDailyAttendanceStudent(cls) {
     const date = document.getElementById("studentAttDate").value;
     if(!cls || !date) return;
+
     const listDiv = document.getElementById("studentAttendanceList");
     listDiv.innerHTML = "<div style='color:#fff; text-align:center;'>Loading Records...</div>";
+
     db.collection("attendance").doc(date + "_" + cls).get().then(attDoc => {
         let attData = attDoc.exists ? attDoc.data() : {};
+        
         if(!isAdmin && !attDoc.exists) {
             listDiv.innerHTML = "<div class='student' style='text-align:center; color:#f59e0b;'>আজকের হাজিরা এখনো নেওয়া হয়নি!</div>";
             return;
         }
+
         db.collection("students").where("class", "==", cls).get().then(snap => {
             if(snap.empty) {
                 listDiv.innerHTML = "<div class='student' style='text-align:center; color:#f59e0b;'>এই ক্লাসে কোনো স্টুডেন্ট পাওয়া যায়নি!</div>";
                 return;
             }
+
             let html = `<h4 style="margin-bottom:15px; border-bottom:1px dashed rgba(255,255,255,0.2); padding-bottom:8px; color:#10b981;">📅 Date: ${date} | Class ${cls}</h4>`;
+            
             snap.forEach(doc => {
                 let s = doc.data();
                 let roll = s.roll || "N/A";
                 let status = attData[roll] || "Not Marked";
+                
                 if(isAdmin) {
                     let pStyle = status === "Present" ? "background:#10b981; color:#fff;" : "background:rgba(255,255,255,0.1); color:#cbd5e1;";
                     let aStyle = status === "Absent" ? "background:#ef4444; color:#fff;" : "background:rgba(255,255,255,0.1); color:#cbd5e1;";
+
                     html += `
                     <div class="student" style="padding: 15px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -834,7 +1039,11 @@ function loadDailyAttendanceStudent(cls) {
                         </div>
                     </div>`;
                 } else {
-                    let badge = status === "Present" ? "<span class='badge-present'>✔️ Present</span>" : (status === "Absent" ? "<span class='badge-absent'>❌ Absent</span>" : "<span style='color:#94a3b8; font-size:12px;'>Not Marked</span>");
+                    let badge = "";
+                    if(status === "Present") badge = "<span class='badge-present'>✔️ Present</span>";
+                    else if(status === "Absent") badge = "<span class='badge-absent'>❌ Absent</span>";
+                    else badge = "<span style='color:#94a3b8; font-size:12px;'>Not Marked</span>";
+
                     html += `
                     <div class="student" style="padding: 15px; display:flex; justify-content:space-between; align-items:center;">
                         <div><b style="font-size:16px;">${s.name}</b><br><span style="color:#94a3b8; font-size:13px;">Roll: ${roll}</span></div>
@@ -849,18 +1058,24 @@ function loadDailyAttendanceStudent(cls) {
 
 function markAttendanceAdmin(date, cls, roll, status) {
     let docId = date + "_" + cls;
-    db.collection("attendance").doc(docId).set({ [roll]: status }, { merge: true }).then(() => { studentLoadAttendance(); }).catch(err => alert("Error: " + err.message));
+    db.collection("attendance").doc(docId).set({ [roll]: status }, { merge: true }).then(() => {
+        studentLoadAttendance(); 
+    }).catch(err => alert("Error: " + err.message));
 }
 
 function loadMonthlyAttendanceStudent(cls) {
     const month = document.getElementById("attMonth").value;
     if(!cls || !month) return;
+
     const listDiv = document.getElementById("studentAttendanceList");
     listDiv.innerHTML = "<div style='color:#fff; text-align:center;'>Calculating Total Days...</div>";
+
     db.collection("students").where("class", "==", cls).get().then(snap => {
-        if(snap.empty) { listDiv.innerHTML = "<div class='student' style='text-align:center;'>No students.</div>"; return; }
+        if(snap.empty) { listDiv.innerHTML = "<div class='student' style='text-align:center;'>No students in this class.</div>"; return; }
+        
         db.collection("attendance").get().then(attSnap => {
             let totalPresent = {}; let totalAbsent = {};
+            
             attSnap.forEach(doc => {
                 let docId = doc.id; 
                 if(docId.startsWith(month) && docId.endsWith("_" + cls)) {
@@ -871,10 +1086,15 @@ function loadMonthlyAttendanceStudent(cls) {
                     }
                 }
             });
+
             let html = `<h4 style="margin-bottom:15px; border-bottom:1px dashed rgba(255,255,255,0.2); padding-bottom:8px; color:#38bdf8;">📅 Month: ${month} | Class ${cls}</h4>`;
+            
             snap.forEach(doc => {
-                let s = doc.data(); let roll = s.roll || "N/A";
-                let pDays = totalPresent[roll] || 0; let aDays = totalAbsent[roll] || 0;
+                let s = doc.data();
+                let roll = s.roll || "N/A";
+                let pDays = totalPresent[roll] || 0;
+                let aDays = totalAbsent[roll] || 0;
+
                 html += `
                 <div class="student" style="padding: 15px; display:flex; justify-content:space-between; align-items:center;">
                     <div><b style="font-size:16px;">${s.name}</b><br><span style="color:#94a3b8; font-size:13px;">Roll: ${roll}</span></div>
@@ -889,14 +1109,27 @@ function loadMonthlyAttendanceStudent(cls) {
     });
 }
 
+// ==========================================
+// DASHBOARD CALCULATION
+// ==========================================
 function loadDashboard(){
     db.collection("students").onSnapshot(snap=>{
-        let total=0, paid=0, unpaid=0, income=0; let html="";
+        let total=0, paid=0, unpaid=0, income=0; 
+        let html="";
+        
         snap.forEach(doc=>{
-            let s=doc.data(); total++;
-            if(checkPaid(s.paidMonth, getMonth())){ paid++; income+=Number(s.fee||0); } 
-            else { unpaid++; html+=`<div class="student" style="padding:15px;"><b style="color:#ef4444;">${s.name}</b><br><span style="color:#94a3b8; font-size:14px;">🏫 Class: ${s.class} | Roll: ${s.roll ? s.roll : 'N/A'}</span><br><span style="color:#cbd5e1; font-weight:600;">📞 ${s.phone}</span></div>`; }
+            let s=doc.data(); 
+            total++;
+            
+            if(checkPaid(s.paidMonth, getMonth())){ 
+                paid++; 
+                income+=Number(s.fee||0); 
+            } else { 
+                unpaid++; 
+                html+=`<div class="student" style="padding:15px;"><b style="color:#ef4444;">${s.name}</b><br><span style="color:#94a3b8; font-size:14px;">🏫 Class: ${s.class} | Roll: ${s.roll ? s.roll : 'N/A'}</span><br><span style="color:#cbd5e1; font-weight:600;">📞 ${s.phone}</span></div>`; 
+            }
         });
+        
         document.getElementById("totalStd").innerText=total; 
         document.getElementById("paidStd").innerText=paid; 
         document.getElementById("unpaidStd").innerText=unpaid; 
@@ -914,48 +1147,78 @@ function loadClass(cls){
 function searchNow(){ loadClass(currentClass); }
 
 function showStudents(snap){
-    let key=document.getElementById("searchBox").value.toLowerCase(); let html="";
+    let key=document.getElementById("searchBox").value.toLowerCase(); 
+    let html="";
+    
     snap.forEach(doc=>{
         let s=doc.data();
         if(key && !s.name.toLowerCase().includes(key)) return;
+        
         let isPaidCurrent = checkPaid(s.paidMonth, getMonth());
         let badge = isPaidCurrent ? '<span class="badge-paid">✔️ Paid (This Month)</span>' : '<span class="badge-unpaid">❌ Unpaid (This Month)</span>';
+        
         let adminBtns = '';
         if(isAdmin){
-            adminBtns += `<div style="margin-top:15px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px;"><p style="font-size:12px; color:#38bdf8; margin-bottom:8px; font-weight:600;">💰 Quick Pay (Last 6 Months):</p><div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px;">`;
+            adminBtns += `<div style="margin-top:15px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px;">`;
+            adminBtns += `<p style="font-size:12px; color:#38bdf8; margin-bottom:8px; font-weight:600;">💰 Quick Pay (Last 6 Months):</p>`;
+            adminBtns += `<div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px;">`;
+            
             for(let i = 0; i < 6; i++) {
-                let d = new Date(); d.setMonth(d.getMonth() - i);
+                let d = new Date();
+                d.setMonth(d.getMonth() - i);
                 let targetMonth = d.getFullYear() + "-" + (d.getMonth() + 1);
-                if(!checkPaid(s.paidMonth, targetMonth)) { adminBtns += `<button class="green" onclick="markPaid('${doc.id}', '${targetMonth}')" style="padding:8px; font-size:11px; margin:0; line-height:1;">✅ ${targetMonth}</button>`; }
+                
+                if(!checkPaid(s.paidMonth, targetMonth)) {
+                    adminBtns += `<button class="green" onclick="markPaid('${doc.id}', '${targetMonth}')" style="padding:8px; font-size:11px; margin:0; line-height:1;">✅ ${targetMonth}</button>`;
+                }
             }
-            adminBtns += `</div><button class="red" onclick="deleteStudent('${doc.id}')" style="padding:10px; font-size:13px; margin-top:10px; width:100%;">🗑️ Delete Student</button></div>`;
+            
+            adminBtns += `</div>`;
+            adminBtns += `<button class="red" onclick="deleteStudent('${doc.id}')" style="padding:10px; font-size:13px; margin-top:10px; width:100%;">🗑️ Delete Student</button>`;
+            adminBtns += `</div>`;
         }
-        html+=`<div class="student"><b>${s.name}</b><br><span style="color:#94a3b8; font-size:14px;">📞 ${isAdmin?s.phone:"Hidden"}</span><br><span style="color:#94a3b8; font-size:14px;">🏫 Class ${s.class} &nbsp;|&nbsp; 📝 Roll: ${s.roll ? s.roll : 'N/A'}</span><br><span style="color:#10b981; font-weight:600; font-size:15px;">💰 ${s.fee} ৳</span><br><div style="margin-top:12px;">${badge}</div>${adminBtns}</div>`;
+
+        html+=`
+        <div class="student">
+            <b>${s.name}</b><br>
+            <span style="color:#94a3b8; font-size:14px;">📞 ${isAdmin?s.phone:"Hidden"}</span><br>
+            <span style="color:#94a3b8; font-size:14px;">🏫 Class ${s.class} &nbsp;|&nbsp; 📝 Roll: ${s.roll ? s.roll : 'N/A'}</span><br>
+            <span style="color:#10b981; font-weight:600; font-size:15px;">💰 ${s.fee} ৳</span><br>
+            <div style="margin-top:12px;">${badge}</div>
+            ${adminBtns}
+        </div>`;
     });
+    
     document.getElementById("list").innerHTML = html || "<div class='student' style='text-align:center; padding:20px;'>No Student Found</div>";
 }
 
 function markPaid(id, targetMonth){ 
     if(!confirm(`আপনি কি নিশ্চিত যে ${targetMonth} মাসের বেতন জমা নিতে চান?`)) return;
+    
     db.collection("students").doc(id).get().then(doc => {
-        let s = doc.data(); let existingRecord = s.paidMonth || "";
+        let s = doc.data();
+        let existingRecord = s.paidMonth || "";
+        
         if(!checkPaid(existingRecord, targetMonth)){
             let newRecord = existingRecord ? existingRecord + "," + targetMonth : targetMonth;
             db.collection("students").doc(id).update({ paidMonth: newRecord });
         }
     });
 }
-function deleteStudent(id){ if(confirm("Are you sure?")){ db.collection("students").doc(id).delete(); } }
+
+function deleteStudent(id){ if(confirm("Are you sure you want to delete this student?")){ db.collection("students").doc(id).delete(); } }
 
 // ==========================================
-// SMART SMS SYSTEM & HISTORY (FIXED)
+// SMS SYSTEM
 // ==========================================
 async function sendUnpaidSMS() {
     const apiUser = "siyamexclusive@gmail.com"; 
     const apiPass = "Tanvir123@"; 
     let today = new Date().toISOString().split('T')[0];
+
     let snapshot = await db.collection("students").get();
     let pendingList = [];
+
     snapshot.forEach(doc => {
         let s = doc.data();
         if(!checkPaid(s.paidMonth, getMonth()) && s.phone && s.lastSent !== today) {
@@ -964,27 +1227,40 @@ async function sendUnpaidSMS() {
             pendingList.push({ id: doc.id, phone: phoneNum, name: s.name });
         }
     });
-    if(pendingList.length === 0) return alert("আজকের জন্য কোনো বকেয়া মেসেজ নেই!");
-    if(!confirm(`এখনো মেসেজ পায়নি এমন ${pendingList.length} জনকে মেসেজ পাঠানো হবে। শুরু করবেন?`)) return;
+
+    if(pendingList.length === 0) {
+        alert("সবাইকে আজকের মেসেজ পাঠানো হয়ে গেছে অথবা কোনো বকেয়া নেই!");
+        return;
+    }
+
+    if(!confirm(`এখনো মেসেজ পায়নি এমন ${pendingList.length} জনকে মেসেজ পাঠানো শুরু হবে। শুরু করবেন?`)) return;
+
     let message = "প্রিয় শিক্ষার্থী, আপনার চলতি মাসের বেতন বকেয়া রয়েছে। অনুগ্রহ করে দ্রুত পরিশোধ করুন। - SHOHAG ICT & MATH CARE";
     let count = 0;
-    alert(`মেসেজ পাঠানো শুরু হয়েছে...`);
+
+    alert(`মেসেজ পাঠানো হচ্ছে... দয়া করে শেষ না হওয়া পর্যন্ত ট্যাবটি বন্ধ করবেন না।`);
+
     for (let i = 0; i < pendingList.length; i++) {
         let student = pendingList[i];
         let url = `https://panel.smsbangladesh.com/api?user=${encodeURIComponent(apiUser)}&password=${encodeURIComponent(apiPass)}&to=${student.phone}&text=${encodeURIComponent(message)}`;
+
         try {
             await fetch(url, { mode: 'no-cors' });
             await db.collection("students").doc(student.id).update({ lastSent: today });
             count++;
             await new Promise(resolve => setTimeout(resolve, 1500)); 
-        } catch (err) { console.error("Error sending to: " + student.name); }
+        } catch (err) {
+            console.error("Error sending to: " + student.name);
+        }
     }
+
     await db.collection("sms_logs").add({
         date: new Date().toLocaleString(),
         message: message,
         totalSent: count,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
+
     alert(`সফলভাবে ${count} জনকে নতুন মেসেজ পাঠানো হয়েছে!`);
     loadSMSLogs(); 
 }
@@ -992,20 +1268,364 @@ async function sendUnpaidSMS() {
 function loadSMSLogs() {
     const display = document.getElementById("smsLogDisplay");
     if(!display) return;
-    display.innerHTML = "<div style='color:#fff; text-align:center;'>ইতিহাস লোড হচ্ছে...</div>";
+    
+    display.innerHTML = "<div style='color:#fff; text-align:center;'>হিস্ট্রি লোড হচ্ছে...</div>";
+
     db.collection("sms_logs").orderBy("timestamp", "desc").limit(15).get().then(snap => {
         if(snap.empty) {
             display.innerHTML = "<div class='student' style='text-align:center; color:#94a3b8;'>কোনো SMS হিস্ট্রি পাওয়া যায়নি!</div>";
             return;
         }
+
         let html = "";
         snap.forEach(doc => {
             let data = doc.data();
-            html += `<div class="student" style="padding: 15px; border-left: 4px solid #10b981; margin-bottom: 10px; background: rgba(255,255,255,0.05);"><div style="color: #38bdf8; font-size: 12px; margin-bottom: 5px;"><i class="fa-regular fa-clock"></i> ${data.date}</div><div style="font-size: 14px; color: #e2e8f0;">"${data.message}"</div><div style="color: #10b981; font-weight: 600; font-size: 13px; margin-top: 8px;"><i class="fa-solid fa-paper-plane"></i> Sent to: ${data.totalSent} Students</div></div>`;
+            html += `
+            <div class="student" style="padding: 15px; border-left: 4px solid #10b981; margin-bottom: 10px; background: rgba(255,255,255,0.05);">
+                <div style="color: #38bdf8; font-size: 12px; margin-bottom: 5px;"><i class="fa-regular fa-clock"></i> ${data.date}</div>
+                <div style="font-size: 14px; color: #e2e8f0;">"${data.message}"</div>
+                <div style="color: #10b981; font-weight: 600; font-size: 13px; margin-top: 8px;"><i class="fa-solid fa-paper-plane"></i> Sent to: ${data.totalSent} Students</div>
+            </div>`;
         });
         display.innerHTML = html;
-    }).catch(err => { display.innerHTML = "<div class='student' style='color:#ef4444;'>Error: " + err.message + "</div>"; });
+    }).catch(err => {
+        display.innerHTML = "<div class='student' style='color:#ef4444;'>Error: " + err.message + "</div>";
+    });
+}
+
+// ==========================================
+// TOOL 1: LOGIC GATE SYSTEM
+// ==========================================
+let currentLogicEq = "";
+
+function typeCalc(val) {
+    if(val === 'AC') { currentLogicEq = ""; } 
+    else if(val === 'DEL') { currentLogicEq = currentLogicEq.slice(0, -1); } 
+    else { currentLogicEq += val; }
+    document.getElementById("calcDisplay").innerText = "F = " + currentLogicEq;
+    document.getElementById("calcOutput").innerHTML = ""; 
+}
+
+function evaluateLogicExpression(eq, variables, values) {
+    let evalStr = eq.replace(/\+/g, '||').replace(/\./g, '&&').replace(/⊕/g, '!==').replace(/⊙/g, '===');
+    for(let i = 0; i < variables.length; i++) {
+        let regex = new RegExp(variables[i], 'g');
+        evalStr = evalStr.replace(regex, values[i]);
+    }
+    evalStr = evalStr.replace(/([01])'/g, function(match, p1) { return (p1 === '1' ? '0' : '1'); });
+    try { return eval(evalStr) ? 1 : 0; } catch(e) { return "?"; }
+}
+
+function generateTruthTable() {
+    if(!currentLogicEq) return alert("দয়া করে একটি সমীকরণ লিখুন!");
+    let vars = currentLogicEq.match(/[A-Z]/g);
+    if(!vars) return alert("সমীকরণে কোনো ভেরিয়েবল পাওয়া যায়নি!");
+    vars = [...new Set(vars)].sort();
+    
+    if(vars.length > 4) return alert("মোবাইল স্ক্রিনের জন্য সর্বোচ্চ ৪টি ভেরিয়েবল ভালো!");
+    
+    let rows = Math.pow(2, vars.length);
+    let html = "<div style='overflow-x:auto;'><table class='truth-table'><tr>";
+    vars.forEach(v => html += `<th>${v}</th>`);
+    html += `<th>F</th></tr>`;
+    
+    for(let i = 0; i < rows; i++) {
+        let bin = i.toString(2).padStart(vars.length, '0');
+        let values = bin.split('');
+        html += "<tr>";
+        values.forEach(v => html += `<td>${v}</td>`);
+        let result = evaluateLogicExpression(currentLogicEq, vars, values);
+        let resColor = result === 1 ? '#10b981' : '#ef4444';
+        html += `<td style="color:${resColor}; font-weight:700;">${result}</td></tr>`;
+    }
+    html += "</table></div>";
+    document.getElementById("calcOutput").innerHTML = html;
+}
+
+function generateLogicCircuit() {
+    if(!currentLogicEq) return alert("দয়া করে একটি সমীকরণ লিখুন!");
+    let container = document.getElementById("calcOutput");
+    container.innerHTML = `<div class="canvas-wrapper"><canvas id='circuitCanvas' width='800' height='400'></canvas></div><div style="text-align:center; color:#94a3b8; font-size:12px; margin-top:8px;">Scroll left-right ↔️</div>`;
+    let canvas = document.getElementById('circuitCanvas'); let ctx = canvas.getContext('2d');
+    try {
+        let ast = parseLogicEqToAST(currentLogicEq); if(!ast) throw "Invalid";
+        calcTreeSize(ast);
+        canvas.height = Math.max(400, ast.h + 100);
+        ctx.fillStyle = "#ffffff"; ctx.font = "bold 16px Poppins, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineWidth = 2.5;
+        let startY = canvas.height / 2;
+        drawLogicTree(ctx, ast, 650, startY);
+        ctx.strokeStyle = "#38bdf8"; ctx.beginPath(); ctx.moveTo(670, startY); ctx.lineTo(720, startY); ctx.stroke();
+        ctx.fillStyle = "#f59e0b"; ctx.fillText("F", 735, startY);
+    } catch(e) {
+        container.innerHTML = "<div class='student' style='text-align:center; color:#ef4444;'>⚠️ সমীকরণটি সঠিকভাবে লেখা হয়নি!</div>";
+    }
+}
+
+function parseLogicEqToAST(eq) {
+    let s = eq.replace(/\s+/g, '').replace(/([A-Z])([A-Z])/g, '$1.$2').replace(/([A-Z])\(/g, '$1.(').replace(/\)([A-Z])/g, ').$1').replace(/\)\(/g, ').(').replace(/'([A-Z])/g, '".$1').replace(/'\(/g, '".(');
+    let precedence = {'\'': 4, '.': 3, '⊕': 2, '⊙': 2, '+': 1};
+    let postfix = [], ops = [];
+    for(let i=0; i<s.length; i++) {
+        let c = s[i];
+        if(/[A-Z]/.test(c)) postfix.push(c); else if(c === '(') ops.push(c);
+        else if(c === ')') { while(ops.length > 0 && ops[ops.length-1] !== '(') postfix.push(ops.pop()); ops.pop(); } 
+        else if(precedence[c]) { while(ops.length > 0 && ops[ops.length-1] !== '(' && precedence[ops[ops.length-1]] >= precedence[c]) { postfix.push(ops.pop()); } ops.push(c); }
+    }
+    while(ops.length > 0) postfix.push(ops.pop());
+    let stack = [];
+    for(let i=0; i<postfix.length; i++) {
+        let t = postfix[i];
+        if(/[A-Z]/.test(t)) { stack.push({type: 'VAR', val: t}); } 
+        else if(t === '\'') { let a = stack.pop(); if(a) stack.push({type: 'NOT', left: a}); } 
+        else { let b = stack.pop(); let a = stack.pop(); let gType = t === '+' ? 'OR' : (t === '.' ? 'AND' : (t === '⊕' ? 'XOR' : 'XNOR')); if(a && b) stack.push({type: gType, left: a, right: b}); }
+    }
+    return stack[0];
+}
+
+function calcTreeSize(node) {
+    if(!node) return {w:0, h:0};
+    if(node.type === 'VAR') { node.w = 30; node.h = 40; return node; }
+    if(node.type === 'NOT') { let s = calcTreeSize(node.left); node.w = s.w + 70; node.h = s.h; return node; }
+    let sL = calcTreeSize(node.left); let sR = calcTreeSize(node.right);
+    node.h = sL.h + sR.h + 30; node.w = Math.max(sL.w, sR.w) + 120;
+    return node;
+}
+
+function drawLogicTree(ctx, node, x, y) {
+    if(!node) return {outX: x, outY: y};
+    if(node.type === 'VAR') { ctx.fillStyle = "#10b981"; ctx.fillText(node.val, x-20, y); ctx.beginPath(); ctx.arc(x-5, y, 4, 0, Math.PI*2); ctx.fill(); return {outX: x-5, outY: y}; }
+    ctx.strokeStyle = "#94a3b8";
+    if(node.type === 'NOT') {
+        let inNode = drawLogicTree(ctx, node.left, x - 80, y); ctx.beginPath(); ctx.moveTo(inNode.outX, inNode.outY); ctx.lineTo(x-30, y); ctx.stroke();
+        ctx.strokeStyle = "#ef4444"; ctx.beginPath(); ctx.moveTo(x-30, y-12); ctx.lineTo(x-5, y); ctx.lineTo(x-30, y+12); ctx.closePath(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(x-1, y, 4, 0, Math.PI*2); ctx.stroke(); ctx.fillStyle = "#cbd5e1"; ctx.font = "10px Arial"; ctx.fillText("NOT", x-20, y+20); ctx.font = "bold 16px Poppins"; return {outX: x+3, outY: y};
+    }
+    let topY = y - node.right.h/2 - 15; let botY = y + node.left.h/2 + 15;
+    let outL = drawLogicTree(ctx, node.left, x - 120, topY); let outR = drawLogicTree(ctx, node.right, x - 120, botY);
+    ctx.strokeStyle = "#94a3b8"; ctx.beginPath(); ctx.moveTo(outL.outX, outL.outY); ctx.lineTo(x-45, outL.outY); ctx.lineTo(x-45, y-8); ctx.moveTo(outR.outX, outR.outY); ctx.lineTo(x-45, outR.outY); ctx.lineTo(x-45, y+8); ctx.stroke();
+    ctx.strokeStyle = "#38bdf8"; ctx.fillStyle = "#cbd5e1"; ctx.font = "12px Arial";
+    if(node.type === 'AND') { ctx.beginPath(); ctx.moveTo(x-45, y-18); ctx.lineTo(x-20, y-18); ctx.arc(x-20, y, 18, -Math.PI/2, Math.PI/2); ctx.lineTo(x-45, y+18); ctx.closePath(); ctx.stroke(); ctx.fillText("AND", x-25, y+28); ctx.font = "bold 16px Poppins"; return {outX: x-2, outY: y}; } 
+    else {
+        ctx.beginPath(); ctx.moveTo(x-45, y-18); ctx.quadraticCurveTo(x-20, y-18, x-2, y); ctx.quadraticCurveTo(x-20, y+18, x-45, y+18); ctx.quadraticCurveTo(x-25, y, x-45, y-18); ctx.stroke();
+        if(node.type === 'XOR' || node.type === 'XNOR') { ctx.beginPath(); ctx.moveTo(x-52, y-18); ctx.quadraticCurveTo(x-32, y, x-52, y+18); ctx.stroke(); }
+        if(node.type === 'XNOR') { ctx.beginPath(); ctx.arc(x+2, y, 4, 0, Math.PI*2); ctx.stroke(); ctx.fillText("XNOR", x-25, y+28); ctx.font = "bold 16px Poppins"; return {outX: x+6, outY: y}; }
+        ctx.fillText(node.type, x-25, y+28); ctx.font = "bold 16px Poppins"; return {outX: x-2, outY: y};
+    }
+}
+
+// ==========================================
+// TOOL 2: BASE CONVERTER
+// ==========================================
+function convertBase() {
+    let val = document.getElementById('baseInput').value.trim();
+    let fromBase = parseInt(document.getElementById('baseFrom').value);
+    
+    let outBin = document.getElementById('outBin');
+    let outOct = document.getElementById('outOct');
+    let outDec = document.getElementById('outDec');
+    let outHex = document.getElementById('outHex');
+
+    if(val === "") {
+        outBin.innerText = "-"; outOct.innerText = "-"; outDec.innerText = "-"; outHex.innerText = "-"; return;
+    }
+
+    try {
+        let dec = parseInt(val, fromBase);
+        if(isNaN(dec)) throw "Invalid";
+        
+        let checkVal = dec.toString(fromBase);
+        if(val.toLowerCase() !== checkVal && val.toLowerCase() !== checkVal.padStart(val.length, '0')) {
+             throw "Invalid char";
+        }
+
+        outBin.innerText = dec.toString(2);
+        outOct.innerText = dec.toString(8);
+        outDec.innerText = dec.toString(10);
+        outHex.innerText = dec.toString(16).toUpperCase();
+    } catch(e) {
+        outBin.innerText = "ভুল ইনপুট!"; outOct.innerText = "ভুল ইনপুট!"; outDec.innerText = "ভুল ইনপুট!"; outHex.innerText = "ভুল ইনপুট!";
+    }
+}
+
+// ==========================================
+// TOOL 3: 2'S COMPLEMENT
+// ==========================================
+function toNBitBinary(num, bits) {
+    if (num >= 0) {
+        return num.toString(2).padStart(bits, '0');
+    } else {
+        let posBin = Math.abs(num).toString(2).padStart(bits, '0');
+        let ones = "";
+        for(let i=0; i<posBin.length; i++) ones += (posBin[i]==='0' ? '1' : '0');
+        let twosNum = parseInt(ones, 2) + 1;
+        return twosNum.toString(2).padStart(bits, '0').slice(-bits);
+    }
+}
+
+function calc2sComplement() {
+    let v1 = document.getElementById('compVal1').value.trim();
+    let b1 = parseInt(document.getElementById('compBase1').value);
+    let op = document.getElementById('compOp').value;
+    let v2 = document.getElementById('compVal2').value.trim();
+    let b2 = parseInt(document.getElementById('compBase2').value);
+    let bits = parseInt(document.getElementById('compBits').value);
+    let outputDiv = document.getElementById('compOutput');
+
+    if(!v1 || !v2) return alert("দয়া করে দুটি সংখ্যাই দিন!");
+
+    let n1 = parseInt(v1, b1);
+    let n2 = parseInt(v2, b2);
+
+    if(isNaN(n1) || isNaN(n2)) return alert("সঠিক সংখ্যা ইনপুট দিন!");
+
+    // Range Check
+    let max = Math.pow(2, bits-1) - 1;
+    let min = -Math.pow(2, bits-1);
+    if(n1 > max || n1 < min || n2 > max || n2 < min) {
+         return outputDiv.innerHTML = `<div class='student badge-unpaid' style='text-align:center;'>${bits}-Bit রেজিস্ট্রারে ${min} থেকে ${max} পর্যন্ত সংখ্যা বসানো যায়!</div>`;
+    }
+
+    let bin1 = toNBitBinary(n1, bits);
+    
+    let html = `<div class="output-box" style="margin-bottom:10px;">
+        <span class="output-label">১ম সংখ্যা (${n1} in Dec)</span>
+        <div style="color:#38bdf8; font-size:16px; letter-spacing:1px;">${bin1}</div>
+    </div>`;
+
+    // 2nd Number logic based on operation
+    let n2_eff = (op === '-') ? -n2 : n2;
+    let bin2_eff = toNBitBinary(n2_eff, bits);
+
+    if(n2_eff < 0) {
+        let absBin2 = Math.abs(n2_eff).toString(2).padStart(bits, '0');
+        let ones = "";
+        for(let i=0; i<absBin2.length; i++) ones += (absBin2[i]==='0' ? '1' : '0');
+        
+        html += `<div class="output-box" style="margin-bottom:10px;">
+            <span class="output-label">২য় সংখ্যা (${n2} in Dec) এর 2's Complement</span>
+            <div style="font-size:13px; color:#cbd5e1;">প্রকৃত মান (+${Math.abs(n2_eff)}): ${absBin2}</div>
+            <div style="font-size:13px; color:#f59e0b;">১-এর পরিপূরক: ${ones}</div>
+            <div style="font-size:16px; color:#ef4444; margin-top:5px; letter-spacing:1px;">২-এর পরিপূরক: ${bin2_eff}</div>
+        </div>`;
+    } else {
+        html += `<div class="output-box" style="margin-bottom:10px;">
+            <span class="output-label">২য় সংখ্যা (${n2_eff} in Dec)</span>
+            <div style="color:#10b981; font-size:16px; letter-spacing:1px;">${bin2_eff}</div>
+            <div style="font-size:12px; color:#94a3b8;">(ধনাত্মক হওয়ায় পরিপূরক প্রয়োজন নেই)</div>
+        </div>`;
+    }
+
+    // Binary Addition Display
+    let sumDec = n1 + n2_eff;
+    let sumBinRaw = (parseInt(bin1, 2) + parseInt(bin2_eff, 2)).toString(2);
+    let finalBin = toNBitBinary(sumDec, bits); 
+    let carry = sumBinRaw.length > bits ? "1" : "0";
+
+    html += `<div class="output-box" style="border-color:#10b981;">
+        <span class="output-label">যোগফল (Addition)</span>
+        <div style="font-size:16px; color:#cbd5e1; font-family:monospace; margin-bottom:5px; letter-spacing:1px;">
+          &nbsp;&nbsp;&nbsp;${bin1}<br>
+          +&nbsp;&nbsp;${bin2_eff}<br>
+          <span style="color:#38bdf8;">------------</span>
+        </div>
+        <div style="color:#10b981; font-weight:bold; font-size:18px; letter-spacing:1px;">
+            ${carry === "1" ? `<span style="color:#ef4444;" title="Carry Bit (Discarded)">${carry}</span> ` : "&nbsp;&nbsp;"}${finalBin}
+        </div>
+        <div style="font-size:13px; color:#94a3b8; margin-top:8px;">
+            ${carry === "1" ? "<span style='color:#ef4444;'>অতিরিক্ত 1 হলো Carry Bit যা বাদ দেওয়া হয়।</span><br>" : ""}
+            ফলাফল (Decimal) = ${sumDec}
+        </div>
+    </div>`;
+
+    outputDiv.innerHTML = html;
+}
+
+// ==========================================
+// TOOL 4: BINARY MATH
+// ==========================================
+function calcBinMath() {
+    let b1 = document.getElementById('binVal1').value.trim();
+    let b2 = document.getElementById('binVal2').value.trim();
+    let op = document.getElementById('binOp').value;
+    
+    if(!b1 || !b2) return alert("দুটি বাইনারি সংখ্যাই দিন!");
+    
+    let d1 = parseInt(b1, 2); let d2 = parseInt(b2, 2);
+    if(isNaN(d1) || isNaN(d2)) return alert("সঠিক বাইনারি (0 এবং 1) ইনপুট দিন!");
+    
+    let resDec = 0;
+    if(op === '+') resDec = d1 + d2;
+    else if(op === '-') resDec = d1 - d2;
+    else if(op === '*') resDec = d1 * d2;
+    else if(op === '/') {
+        if(d2 === 0) return alert("শূন্য (0) দিয়ে ভাগ করা যায় না!");
+        resDec = Math.floor(d1 / d2);
+    }
+    
+    let resBin = resDec.toString(2);
+    if(resDec < 0) resBin = "-" + Math.abs(resDec).toString(2);
+
+    document.getElementById('binResult').innerText = resBin;
+    document.getElementById('binResultDec').innerText = `${d1} ${op} ${d2} = ${resDec}`;
+}
+
+// ==========================================
+// TOOL 5: HTML PRACTICE
+// ==========================================
+function runHtml() {
+    let code = document.getElementById('htmlInput').value;
+    let frame = document.getElementById('htmlOutputFrame');
+    let htmlContent = `<style>body{font-family:sans-serif; color:#333; padding:10px;}</style>` + code;
+    frame.srcdoc = htmlContent;
+}
+
+// ==========================================
+// TOOL 6: MATH SOLVER
+// ==========================================
+function solveQuadratic() {
+    let a = parseFloat(document.getElementById('quadA').value);
+    let b = parseFloat(document.getElementById('quadB').value);
+    let c = parseFloat(document.getElementById('quadC').value);
+    let out = document.getElementById('quadOutput');
+    
+    if(isNaN(a) || isNaN(b) || isNaN(c)) return alert("a, b এবং c এর মান সঠিকভাবে দিন!");
+    if(a === 0) return alert("a এর মান 0 হতে পারে না (তাহলে এটি দ্বিঘাত সমীকরণ নয়)!");
+
+    let d = (b * b) - (4 * a * c);
+    let html = "";
+    
+    if(d > 0) {
+        let x1 = (-b + Math.sqrt(d)) / (2 * a);
+        let x2 = (-b - Math.sqrt(d)) / (2 * a);
+        html = `
+        <div class="output-box">
+            <span class="output-label">নিশ্চায়ক (D) = ${d}</span>
+            <div style="font-size:15px; color:#10b981;">মূলদ্বয় বাস্তব ও অসমান:</div>
+            <div style="font-size:20px; font-weight:bold; color:#fff; margin-top:5px;">x₁ = ${x1.toFixed(2)}</div>
+            <div style="font-size:20px; font-weight:bold; color:#fff; margin-top:5px;">x₂ = ${x2.toFixed(2)}</div>
+        </div>`;
+    } else if(d === 0) {
+        let x = -b / (2 * a);
+        html = `
+        <div class="output-box">
+            <span class="output-label">নিশ্চায়ক (D) = 0</span>
+            <div style="font-size:15px; color:#f59e0b;">মূলদ্বয় বাস্তব ও সমান:</div>
+            <div style="font-size:20px; font-weight:bold; color:#fff; margin-top:5px;">x = ${x.toFixed(2)}</div>
+        </div>`;
+    } else {
+        let real = (-b / (2 * a)).toFixed(2);
+        let imag = (Math.sqrt(-d) / (2 * a)).toFixed(2);
+        html = `
+        <div class="output-box">
+            <span class="output-label">নিশ্চায়ক (D) = ${d}</span>
+            <div style="font-size:15px; color:#ef4444;">মূলদ্বয় জটিল (Complex/Imaginary):</div>
+            <div style="font-size:20px; font-weight:bold; color:#fff; margin-top:5px;">x₁ = ${real} + ${imag}i</div>
+            <div style="font-size:20px; font-weight:bold; color:#fff; margin-top:5px;">x₂ = ${real} - ${imag}i</div>
+        </div>`;
+    }
+    out.innerHTML = html;
 }
 </script>
+
 </body>
 </html>
